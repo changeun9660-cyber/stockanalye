@@ -1,0 +1,849 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>미국 시장 사이클 진단</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700&family=Noto+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+  :root{
+    --bg:#ECEDE6; --surface:#F8F7F2; --surface-2:#FFFFFF;
+    --ink:#16223A; --ink-soft:#3A4557; --muted:#6B7280; --line:#D8D7CC;
+    --accent:#A97B2F; --accent-soft:#EFE2C8;
+    --s1:#A97B2F; --s2:#2D6A9F;              /* 검증 통과 시리즈 색 (light) */
+    --good:#2E7D5B; --good-soft:#DEEEE5;
+    --warning:#C1651B; --warning-soft:#F4E3D2;
+    --critical:#B23A34; --critical-soft:#F5DEDC;
+    --shadow:0 1px 2px rgba(22,34,58,.06), 0 8px 24px -12px rgba(22,34,58,.18);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#12161C; --surface:#1A2029; --surface-2:#1F2631;
+      --ink:#ECE9DF; --ink-soft:#C6CCD6; --muted:#8C97A5; --line:#2C333F;
+      --accent:#D3A559; --accent-soft:#3A3120;
+      --s1:#BC8A3C; --s2:#4A96D8;            /* 검증 통과 시리즈 색 (dark) */
+      --good:#57B98B; --good-soft:#1D3129;
+      --warning:#E0973F; --warning-soft:#3A2A18;
+      --critical:#E0605A; --critical-soft:#3A2020;
+      --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 28px -12px rgba(0,0,0,.6);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#12161C; --surface:#1A2029; --surface-2:#1F2631;
+    --ink:#ECE9DF; --ink-soft:#C6CCD6; --muted:#8C97A5; --line:#2C333F;
+    --accent:#D3A559; --accent-soft:#3A3120;
+    --s1:#BC8A3C; --s2:#4A96D8;
+    --good:#57B98B; --good-soft:#1D3129;
+    --warning:#E0973F; --warning-soft:#3A2A18;
+    --critical:#E0605A; --critical-soft:#3A2020;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 28px -12px rgba(0,0,0,.6);
+  }
+
+  *{box-sizing:border-box;}
+  body{ margin:0; background:var(--bg); color:var(--ink);
+    font-family:"Noto Sans KR","Apple SD Gothic Neo",sans-serif; line-height:1.7; letter-spacing:-0.01em; }
+  .wrap{ max-width:900px; margin:0 auto; padding:56px 24px 96px; }
+  h1,h2,h3,h4{ font-family:"Noto Serif KR",serif; text-wrap:balance; color:var(--ink); margin:0; }
+  p{ color:var(--ink-soft); font-size:15.5px; }
+  .lede{ font-size:16.5px; }
+
+  .eyebrow{ display:flex; align-items:center; gap:10px; font-family:"IBM Plex Mono",monospace;
+    font-size:12.5px; letter-spacing:.12em; color:var(--accent); text-transform:uppercase; margin-bottom:18px; }
+  .eyebrow .dot{ width:6px; height:6px; border-radius:50%; background:var(--accent); }
+  header h1{ font-size:clamp(28px,4.5vw,40px); font-weight:700; line-height:1.3; }
+  header .sub{ margin-top:14px; color:var(--ink-soft); font-size:16.5px; max-width:62ch; }
+
+  .asof{ margin-top:22px; display:flex; gap:10px; align-items:flex-start; flex-wrap:wrap;
+    background:var(--surface); border:1px dashed var(--line); border-radius:12px; padding:12px 16px; }
+  .asof .tagm{ font-family:"IBM Plex Mono",monospace; font-size:11.5px; font-weight:600;
+    color:var(--muted); letter-spacing:.06em; white-space:nowrap; }
+  .asof p{ margin:0; font-size:13.2px; color:var(--muted); }
+
+  .verdict{ margin-top:24px; display:flex; gap:18px; align-items:flex-start; background:var(--surface);
+    border:1px solid var(--line); border-radius:16px; padding:22px 24px; box-shadow:var(--shadow); }
+  .verdict .chip{ flex-shrink:0; padding:7px 14px; border-radius:999px; font-size:13px; font-weight:700;
+    background:var(--warning-soft); color:var(--warning); white-space:nowrap;
+    border:1px solid color-mix(in srgb, var(--warning) 35%, transparent); }
+  @media (max-width:560px){ .verdict{ flex-direction:column; gap:12px; } .verdict .chip{ white-space:normal; } }
+  .verdict p{ margin:0; font-size:15px; } .verdict strong{ color:var(--ink); }
+
+  section{ margin-top:64px; }
+  .section-head{ display:flex; align-items:baseline; justify-content:space-between; gap:16px; margin-bottom:20px; flex-wrap:wrap; }
+  .section-head h2{ font-size:22px; font-weight:600; }
+  .section-head .note{ font-size:12.5px; color:var(--muted); font-family:"IBM Plex Mono",monospace; }
+
+  .chart-card{ background:var(--surface); border:1px solid var(--line); border-radius:16px;
+    padding:24px 20px 16px; box-shadow:var(--shadow); }
+  .chart-scroll{ overflow-x:auto; position:relative; }
+  .chart-scroll svg{ display:block; min-width:640px; width:100%; height:auto; }
+  .chart-legend{ display:flex; gap:20px; flex-wrap:wrap; margin-top:10px; padding:0 4px; font-size:12.5px; color:var(--muted); }
+  .chart-legend span{ display:inline-flex; align-items:center; gap:6px; }
+  .chart-legend i{ width:12px; height:3px; border-radius:2px; display:inline-block; }
+  .chart-legend i.sq{ height:10px; width:10px; border-radius:2px; }
+  .chart-note{ margin-top:12px; font-size:12.4px; color:var(--muted); padding:0 4px; }
+
+  .tip{ position:absolute; pointer-events:none; opacity:0; transition:opacity .12s;
+    background:var(--surface-2); border:1px solid var(--line); border-radius:10px; padding:9px 12px;
+    box-shadow:var(--shadow); font-size:12.5px; color:var(--ink); white-space:nowrap; z-index:5;
+    font-family:"IBM Plex Mono",monospace; }
+  .tip .tt{ font-weight:600; margin-bottom:3px; display:block; color:var(--muted); font-size:11.5px; }
+  .tip .tr{ display:flex; align-items:center; gap:6px; }
+  .tip .tr i{ width:9px; height:3px; border-radius:2px; }
+
+  .stat-row{ display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
+  .stat-row.three{ grid-template-columns:repeat(3,1fr); }
+  @media (max-width:700px){ .stat-row, .stat-row.three{ grid-template-columns:1fr 1fr; } }
+  @media (max-width:430px){ .stat-row, .stat-row.three{ grid-template-columns:1fr; } }
+  .stat{ background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:15px 16px;
+    display:flex; flex-direction:column; gap:4px; box-shadow:var(--shadow); }
+  .stat .k{ font-family:"IBM Plex Mono",monospace; font-size:21px; font-weight:600; color:var(--ink); }
+  .stat .k.neg{ color:var(--critical); } .stat .k.pos{ color:var(--good); }
+  .stat .v{ font-size:12.6px; color:var(--muted); line-height:1.5; }
+
+  .position-grid{ display:grid; grid-template-columns:1fr 1fr; gap:24px; align-items:center; }
+  @media (max-width:680px){ .position-grid{ grid-template-columns:1fr; } }
+  .radar-card{ background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:20px; box-shadow:var(--shadow); }
+  .radar-card svg{ width:100%; height:auto; display:block; }
+  .position-text h3{ font-size:17px; margin-bottom:10px; }
+  .position-text p{ font-size:14.8px; }
+
+  .grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:14px; }
+  .card{ background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:18px 18px 16px;
+    box-shadow:var(--shadow); display:flex; flex-direction:column; gap:8px; }
+  .card .row1{ display:flex; justify-content:space-between; align-items:flex-start; gap:8px; }
+  .card .label{ font-size:13px; color:var(--muted); }
+  .card .value{ font-family:"IBM Plex Mono",monospace; font-size:23px; font-weight:600; color:var(--ink); }
+  .status{ font-size:11.5px; font-weight:700; padding:3px 9px; border-radius:999px; white-space:nowrap; }
+  .status.good{ background:var(--good-soft); color:var(--good); }
+  .status.warn{ background:var(--warning-soft); color:var(--warning); }
+  .status.crit{ background:var(--critical-soft); color:var(--critical); }
+  .card .desc{ font-size:13.3px; color:var(--ink-soft); }
+
+  .framework{ display:grid; grid-template-columns:repeat(4,1fr); background:var(--surface);
+    border:1px solid var(--line); border-radius:16px; overflow:hidden; box-shadow:var(--shadow); }
+  @media (max-width:720px){ .framework{ grid-template-columns:1fr 1fr; } }
+  .phase{ padding:20px 16px; border-right:1px solid var(--line); position:relative; }
+  .phase:last-child{ border-right:none; }
+  .phase .tag{ font-family:"IBM Plex Mono",monospace; font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.08em; }
+  .phase h4{ font-size:16px; margin:6px 0 8px; }
+  .phase p{ font-size:13.2px; margin:0; }
+  .phase.active{ background:var(--accent-soft); }
+  .phase.active h4{ color:var(--accent); }
+  .phase.active::before{ content:"현재 위치"; position:absolute; top:8px; right:12px; font-size:10.5px; font-weight:700; color:var(--accent); }
+
+  .callout{ margin-top:24px; background:var(--accent-soft);
+    border:1px solid color-mix(in srgb, var(--accent) 30%, transparent); border-radius:16px; padding:24px 26px; }
+  .callout h3{ font-size:18px; margin-bottom:10px; }
+  .callout p{ margin:0 0 10px; font-size:15px; } .callout p:last-child{ margin-bottom:0; }
+  .callout strong{ color:var(--ink); }
+
+  .scenarios{ display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+  @media (max-width:760px){ .scenarios{ grid-template-columns:1fr; } }
+  .scenario{ background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:20px;
+    box-shadow:var(--shadow); display:flex; flex-direction:column; gap:10px; }
+  .scenario .prob{ font-family:"IBM Plex Mono",monospace; font-size:12px; color:var(--muted); }
+  .scenario h4{ font-size:17px; }
+  .scenario p{ font-size:13.6px; margin:0; }
+  .scenario .trigger{ margin-top:auto; padding-top:10px; border-top:1px dashed var(--line); font-size:12.6px; color:var(--muted); }
+
+  /* 주간 변화 */
+  .delta-list{ border:1px solid var(--line); border-radius:14px; overflow:hidden; background:var(--surface); box-shadow:var(--shadow); }
+  .delta-row{ display:flex; gap:14px; align-items:center; padding:13px 18px; border-bottom:1px solid var(--line); }
+  .delta-row:last-child{ border-bottom:none; }
+  .delta-row.alert{ background:var(--critical-soft); }
+  .arw{ flex-shrink:0; width:28px; height:28px; border-radius:8px; display:flex; align-items:center;
+    justify-content:center; font-size:14px; font-weight:700; font-family:"IBM Plex Mono",monospace; }
+  .arw.worsen{ background:var(--critical-soft); color:var(--critical); }
+  .arw.improve{ background:var(--good-soft); color:var(--good); }
+  .arw.neutral{ background:var(--accent-soft); color:var(--muted); }
+  .delta-row .nm{ flex:1; min-width:0; font-size:14.2px; color:var(--ink); }
+  .delta-row .nm small{ display:block; color:var(--muted); font-size:12.5px; font-weight:400; margin-top:2px; }
+  .delta-row .vals{ flex-shrink:0; text-align:right; font-family:"IBM Plex Mono",monospace;
+    font-size:13px; white-space:nowrap; }
+  .delta-row .vals .prev{ color:var(--muted); }
+  .delta-row .vals .now{ color:var(--ink); font-weight:600; }
+  .delta-row .vals .dlt{ display:block; font-size:11.8px; margin-top:2px; }
+  .delta-row .vals .dlt.worsen{ color:var(--critical); }
+  .delta-row .vals .dlt.improve{ color:var(--good); }
+  .delta-row .vals .dlt.neutral{ color:var(--muted); }
+  @media (max-width:560px){
+    .delta-row{ flex-wrap:wrap; }
+    .delta-row .vals{ text-align:left; padding-left:42px; width:100%; }
+  }
+  .baseline-box{ border:1px dashed var(--line); border-radius:14px; background:var(--surface);
+    padding:22px 24px; }
+  .baseline-box h3{ font-size:16.5px; margin-bottom:8px; }
+  .baseline-box p{ margin:0 0 8px; font-size:14.4px; } .baseline-box p:last-child{ margin-bottom:0; }
+
+  .watchlist{ border:1px solid var(--line); border-radius:14px; overflow:hidden; background:var(--surface); box-shadow:var(--shadow); }
+  .watch-item{ display:flex; gap:14px; padding:16px 20px; border-bottom:1px solid var(--line); align-items:flex-start; }
+  .watch-item:last-child{ border-bottom:none; }
+  .watch-item .sig{ flex-shrink:0; width:34px; height:34px; border-radius:10px; display:flex; align-items:center;
+    justify-content:center; font-family:"IBM Plex Mono",monospace; font-weight:700; font-size:13px; margin-top:2px; }
+  .watch-item p{ margin:0; font-size:14px; } .watch-item strong{ color:var(--ink); }
+
+  .fixes{ border:1px solid var(--line); border-radius:14px; overflow:hidden; background:var(--surface); box-shadow:var(--shadow); }
+  .fix{ padding:14px 20px; border-bottom:1px solid var(--line); font-size:13.6px; color:var(--ink-soft); }
+  .fix:last-child{ border-bottom:none; }
+  .fix b{ color:var(--ink); }
+  .fix .was{ color:var(--critical); text-decoration:line-through; font-family:"IBM Plex Mono",monospace; font-size:12.8px; }
+  .fix .now{ color:var(--good); font-family:"IBM Plex Mono",monospace; font-size:12.8px; font-weight:600; }
+
+  .source-box{ background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:20px 22px; font-size:13px; color:var(--muted); }
+  .source-box a{ color:var(--accent); text-decoration:none; border-bottom:1px solid color-mix(in srgb, var(--accent) 40%, transparent); }
+  .source-box code{ font-family:"IBM Plex Mono",monospace; background:var(--accent-soft); padding:1px 5px; border-radius:4px; color:var(--ink-soft); }
+  .disclaimer{ margin-top:40px; padding-top:24px; border-top:1px solid var(--line); font-size:12.6px; color:var(--muted); }
+  footer{ margin-top:56px; text-align:center; font-size:12px; color:var(--muted); font-family:"IBM Plex Mono",monospace; }
+</style>
+
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow"><span class="dot"></span>MARKET CYCLE VIEW · 13차 개정판</div>
+    <h1>지금 시장은 사이클의 어디쯤 와 있을까</h1>
+    <p class="sub">공개 거시지표(연준·재무부·BLS)와 밸류에이션·레버리지·신용·심리 지표를 모아 &ldquo;마켓사이클뷰&rdquo;류 도구가 다루는 항목들을 직접 재구성했습니다. 숫자는 실제 데이터이고, 해석은 하워드 막스식 사이클 프레임워크를 기준으로 했습니다.</p>
+
+    <div class="asof">
+      <span class="tagm">데이터 기준</span>
+      <p>가격 <strong style="color:var(--ink-soft)">2026-11-13</strong> 종가 · 거시지표 <strong style="color:var(--ink-soft)">2026년 9~11월</strong> 발표분(실업률·비농업고용·실효 기준금리는 10월 공식치, 10년물은 10월 월평균 5.13%(공식치로 확인)와 일간 수치 11/12 5.10%를 함께 표기, 미시간 소비자심리는 11월 예비치, <strong style="color:var(--ink-soft)">CPI는 10월분(11/10 발표) 반영</strong> &mdash; 단 2025년 10월 셧다운으로 공식 전년비가 발표되지 않아 전월비 +0.4%와 추정 전년비 약 4.2%를 표기, LEI·마진부채는 9월치 유지 &mdash; 10월분은 11월 하순 발표) &middot; 최종 개정 <strong style="color:var(--ink-soft)">2026-11-14</strong>. 이 페이지는 <strong style="color:var(--ink-soft)">매주</strong> 최신 수치로 갱신됩니다 &mdash; 링크는 그대로 유지됩니다.</p>
+    </div>
+
+    <div class="verdict">
+      <span class="chip">⚠ 금융 과열 · 실물 냉각 + 통화정책 반전</span>
+      <p><strong>지난주 &lsquo;금융 과열&rsquo; 쪽에 생긴 균열은 이번 주 일단 메워졌지만, 그 대신 &lsquo;통화정책 반전&rsquo; 쪽 압력이 다시 커졌습니다.</strong> SPY는 11/9 하루 +2.4% 반등을 시작으로 735.29&rarr;<strong>754.37</strong>(+2.6%)까지 회복해 고점 대비 낙폭이 &minus;5.6%&rarr;&minus;3.2%로 줄었습니다. 걱정했던 신용시장도 11/5 급락 당일 하이일드 스프레드가 <strong>348bp</strong>까지 넓어져 350bp 경보선에 2bp 차로 다가갔다가, 11/12 <strong>320bp</strong>로 오히려 좁아졌습니다 &mdash; 지금까지는 &lsquo;주식만의 흔들림&rsquo;에 가깝습니다. 공포탐욕지수도 극단적 공포에서 &lsquo;공포&rsquo; 구간으로 올라섰습니다. 반면 11/10 발표된 <strong>10월 CPI는 전월비 +0.4%</strong>(예상 +0.3%), 핵심 +0.3%(예상 +0.2%)로 다시 예상을 웃돌았고, 추정 전년비는 약 4.2%로 9월 3.7%보다 높아졌습니다. 그 결과 <strong>10년물 금리는 4.84%&rarr;5.10%로 다시 5%를 넘었고</strong>, 시장은 12월 8~9일 FOMC의 추가 인상 확률을 80% 이상으로 보고 있습니다(일부 위원은 0.5%p 인상까지 언급). 밸류에이션(CAPE 약 41배)·레버리지(마진부채 $1.48조)는 여전히 극단이라 큰 틀의 진단은 유지합니다 &mdash; 이번 주의 핵심은 &lsquo;자산 가격이 버티는 동안 물가와 금리가 다시 조여 오고 있다&rsquo;는 점입니다.</p>
+    </div>
+  </header>
+
+  <section id="weekly">
+    <div class="section-head">
+      <h2>이번 주에 달라진 것</h2>
+      <span class="note" id="deltaRange"></span>
+    </div>
+    <div id="deltaBody"></div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <h2>먼저, 시장 자체는 지금 어디에 있나</h2>
+      <span class="note">SPY · 2026-11-13 종가 기준</span>
+    </div>
+    <p class="lede">사이클 이야기를 하기 전에 좌표부터 찍어야 합니다. 결론부터 말하면 <strong>지수는 지난주 급락분의 상당 부분을 되찾아, 8월 말부터 이어진 박스권(754~779)의 하단으로 돌아왔습니다.</strong> 11/5 733.00까지 밀렸던 SPY는 11/9 752.69(+2.4%)로 반등했고, 11/11 759.81까지 오른 뒤 11/13 754.37로 마감했습니다. 고점 대비 &minus;3.2%로, 공식 &lsquo;조정&rsquo;(&minus;10%)과의 거리는 다시 멀어졌습니다.</p>
+    <div class="stat-row">
+      <div class="stat">
+        <span class="k">754.37</span>
+        <span class="v">SPY 종가 (11/13). S&amp;P 500 추종 ETF로, 미국 대형주 전체의 대리 지표입니다. 지난주(11/6 735.29) 대비 <strong>+2.59%</strong>.</span>
+      </div>
+      <div class="stat">
+        <span class="k neg">&minus;3.17%</span>
+        <span class="v">직전 고점(10/6, 779.09) 대비. 지난주 &minus;5.62%에서 줄었습니다. <strong>조정(-10%) 기준선(약 701)까지는 약 6.8%p 여유</strong>가 생겼습니다.</span>
+      </div>
+      <div class="stat">
+        <span class="k pos">+16.0%</span>
+        <span class="v">3월 말 저점(650.34) 이후 상승률. 지난주 +13.1%에서 다시 늘어 상승 추세가 유지되고 있습니다.</span>
+      </div>
+      <div class="stat">
+        <span class="k neg">≈22.3%</span>
+        <span class="v">최근 20일 실현변동성(연율). 지난주 약 20.2%에서 조금 더 올랐습니다 &mdash; 주가는 회복했지만 <strong>하루하루의 흔들림은 아직 가라앉지 않았다</strong>는 뜻입니다(11/5 &minus;4.4%, 11/9 +2.4% 같은 큰 날이 20일 안에 들어 있음).</span>
+      </div>
+    </div>
+    <p style="margin-top:16px;font-size:14.4px">참고로 7월에는 고점 대비 &minus;3.4%(7/10 754.95 → 7/29 729.46)의 눌림목이 있었고, 8월 말부터는 754~779 구간의 박스권에서 오르내렸습니다. 9/16 연준의 깜짝 인상 당일 하단(754.05)까지 밀렸다가 10/6 779.09(신고가)까지 올랐고, 10/14 9월 CPI(3.7%) 발표 뒤 763.25(10/16), 10/23 759.97로 다시 밀렸습니다. 이후 11/2 752.10으로 9/16 저점을 처음 종가로 밑돌았고, 11/5 733.00으로 급락해 7월 말 저점(729.46) 바로 위까지 내려갔습니다. <strong>그 7월 저점은 지켜졌습니다.</strong> 11/9부터 반등해 11/11 759.81, 11/13 754.37로 박스권 하단(754~761) 언저리에 다시 올라섰습니다. <strong>지금 관전 포인트는 이 하단을 종가로 지켜내느냐</strong>입니다 &mdash; 지켜내면 11/5 급락은 박스권 안의 &lsquo;속임수 이탈&rsquo;로, 다시 밀리면 733(11/5 저점)&middot;729(7월 저점)가 재시험대가 됩니다.</p>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <h2>금리로 본 한 번의 완전한 사이클</h2>
+      <span class="note">2020.01 – 2026.10 · 월간 · 마우스를 올려보세요</span>
+    </div>
+    <p class="lede">사이클은 추상적인 개념이 아닙니다. 금리 두 개만 그려봐도 &ldquo;제로금리 → 급격한 인상 → 고점 유지 → 인하&rdquo;라는 완결된 파동 하나가 그대로 보입니다. 그런데 이번 주, 이 파동에 <strong>아무도 예상 못한 새 국면</strong>이 붙었습니다 &mdash; 인하가 끝나고 다시 인상이 시작된 것입니다.</p>
+    <div class="chart-card">
+      <div class="chart-scroll" id="fedWrap">
+        <svg id="fedChart" viewBox="0 0 860 320" preserveAspectRatio="xMidYMid meet" role="img" aria-label="2020년부터 2026년까지 미국 실효 기준금리와 10년물 국채금리 추이. 2025년 하반기 이후 기준금리는 내려가는데 10년물은 올라가는 역전 현상이 나타남"></svg>
+      </div>
+      <div class="chart-legend">
+        <span><i style="background:var(--s1)"></i>실효 연방기금금리 (연준이 정하는 단기금리)</span>
+        <span><i style="background:var(--s2)"></i>10년물 국채금리 (시장이 정하는 장기금리)</span>
+      </div>
+      <p class="chart-note">회색 음영은 2022–23년 긴축 구간, 우측 음영은 2024년 9월 시작된 인하 구간(2026년 9월 인상으로 종료)입니다. 9월부터 9/16 인상이 반영돼 기준금리 선이 다시 위로 꺾였고, 10월에는 인상 효과가 한 달 내내 반영돼 월평균 3.88%가 됐습니다. 10년물은 <strong>10월 월평균 5.13%</strong>로 처음 5%를 넘었습니다(이번 주 Alpha Vantage 공식 월간치로 확인). 일간 수치로는 10월 초 5.3%대에서 11/5 4.84%까지 내려왔다가, 10월 CPI 발표 뒤 11/12 <strong>5.10%</strong>로 다시 5% 위로 올라섰습니다.</p>
+    </div>
+
+    <div class="callout">
+      <h3>인하가 끝났다 &mdash; 연준이 다시 금리를 올렸다</h3>
+      <p><strong>9월 16일 FOMC가 기준금리를 3.75~4.00%로 0.25%p 인상했습니다.</strong> 2023년 이후 첫 인상이자, 2025년 10월부터 이어진 인하 사이클(4.09%→3.63%, &minus;0.46%p)의 정반대 방향 전환입니다. 표결은 12&minus;0 만장일치였고, 연준은 성명에서 &ldquo;물가가 여전히 높은 수준&rdquo;이며 &ldquo;이번 조치가 2% 목표로의 복귀를 앞당길 것&rdquo;이라고 밝혔습니다. 점도표는 올해 12월 추가 인상 가능성까지 시사합니다.</p>
+      <p>이건 사실 이 리포트가 지난 몇 달간 반복해온 &ldquo;연준은 내리는데 장기금리는 오른다&rdquo;는 이야기의 결말이기도 합니다. 2025년 10월부터 2026년 8월까지 연준이 0.46%p 내리는 동안 10년물은 오히려 0.62%p 올라 있었습니다(4.06%→4.68%). 결국 물가(3.4%)가 충분히 잡히지 않으면서, 연준마저 방향을 바꾼 셈입니다. &ldquo;연준이 구해주러 온다&rdquo;는 전제 자체가 흔들린 데 더해, 이번 주 공식 발표된 9월 수치는 그 흔들림이 숫자로 드러났습니다.</p>
+      <p>시장의 첫 반응은 예상대로 흔들림이었습니다 &mdash; 발표 당일 SPY는 754선까지 밀렸습니다. 이후 773.50→765.55→769.64로 오르내리며 박스권 안에서 힘겨루기가 계속되는 동안, <strong>10년물은 9월 공식치로 4.99%까지 올라섰습니다</strong>(8월 4.68% 대비 +31bp) &mdash; 2007년 이후 거의 20년 만의 최고권입니다. 그리고 매일 발표되는 수치로는 이미 5%를 넘었습니다 &mdash; 10/2 5.28%, 10/5 5.31%, 10/9 5.24%, 10/15 5.10%. 그리고 10/22에는 4.96%로 3주 만에 5% 아래로 내려왔습니다(3주 연속 주간 하락). 이후로도 내려와 11/5에는 4.84%였습니다 &mdash; 11/5 주식 급락 때 안전자산인 국채로 돈이 몰린 영향이었습니다. <strong>그러나 11/10 10월 CPI가 예상보다 높게 나오자 다시 뛰어 11/12 5.10%로 5%를 재돌파했습니다</strong>(11/12 10년물 국채 입찰 낙찰금리도 5.02%).</p>
+      <p><strong>10월 28일 FOMC는 금리를 3.75~4.00%로 동결했지만, 표결은 10&minus;2였습니다.</strong> 반대한 두 위원(쿡·해맥)은 동결이 아니라 <em>추가 인상</em>을 주장했습니다. 즉 연준 안에서도 &ldquo;아직 덜 올렸다&rdquo;는 목소리가 커지고 있다는 뜻이고, 시장은 12월 추가 인상 가능성을 여전히 높게 보고 있다는 보도가 이어지고 있습니다. 여기에 11/6 발표된 10월 고용이 예상보다 훨씬 강하게(+16.5만) 나왔고, 11/10 10월 CPI까지 전월비 +0.4%(핵심 +0.3%)로 예상을 웃돌았습니다. 월러 이사는 핵심 물가가 0.3% 이상이면 12월에 <em>0.5%p</em> 인상도 검토해야 한다고 말했고, CME FedWatch 기준 12월(8~9일) 0.25%p 인상 확률은 80%를 넘었습니다. 연준이 금리를 내려줄 이유는 사실상 사라졌습니다.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <h2>실물경제의 체감 온도</h2>
+      <span class="note">LEI 2026.09 · 미시간 소비자심리 2026.11 예비</span>
+    </div>
+    <p class="lede">여기가 이번 사이클에서 가장 이상한 부분입니다. <strong>주가는 사상 최고 부근인데, 소비자들이 느끼는 경기는 지난 50년간의 모든 침체 시작 시점보다 나쁩니다.</strong> 11/6 나온 11월 예비치(51.0)는 석 달 만의 최고로 반등했지만, 1년 전(51.0)과 같은 수준일 뿐 여전히 역사적 최저권입니다.</p>
+
+    <div class="stat-row" style="margin-bottom:20px">
+      <div class="stat">
+        <span class="k neg">51.0</span>
+        <span class="v"><strong>미시간대 소비자심리지수</strong>(11월 예비치, 11/6 발표). 10월 확정 48.0 대비 <strong>+6.3%</strong>로 석 달 만의 최고. 전년비 0%(2025년 11월도 51.0). 장기평균 83.7 대비 여전히 약 &minus;39%. 확정치는 11월 하순 발표.</span>
+      </div>
+      <div class="stat">
+        <span class="k pos">기대 4.3%</span>
+        <span class="v">11월 예비치의 1년 기대인플레이션 <strong>4.3%</strong>(10월 확정 4.7%에서 하락, 8월 이후 최저). 장기(5~10년) 기대는 3.5%&rarr;3.4%. 소비자가 느끼는 물가 불안은 다소 누그러졌습니다 &mdash; 다만 실제 10월 CPI는 다시 예상을 웃돌았습니다.</span>
+      </div>
+      <div class="stat">
+        <span class="k">99.6</span>
+        <span class="v"><strong>컨퍼런스보드 LEI</strong>(경기선행지수, 2016=100). 9월 전월비 0.0%(보합), 8월치는 99.5&rarr;99.6으로 상향 수정. 6개월 변화율 &minus;0.1%&rarr;<strong>+0.6%</strong>로 플러스 전환.</span>
+      </div>
+      <div class="stat">
+        <span class="k pos">신호 없음</span>
+        <span class="v">공식 <strong>침체 신호는 미발동</strong>(&minus;4.3% 임계값과 거리가 멂). 확산지수 55.0(8월 수정치 45.0에서 회복) &mdash; 10개 구성요소 중 5개가 개선됐지만 소비자 기대 급락이 그 효과를 상쇄했습니다.</span>
+      </div>
+    </div>
+
+    <p><strong>LEI는 다시 플러스로 돌아섰지만, 그 안을 들여다보면 소비자 쪽은 여전히 나쁩니다.</strong> 컨퍼런스보드는 9월 구성요소 10개 중 5개가 개선됐지만 &lsquo;소비자 기대의 큰 하락&rsquo;이 나머지 개선분을 상쇄했다고 설명했습니다.</p>
+    <p>앞서 7월 LEI를 <em>떠받친</em> 요인 중 하나는 &lsquo;수익률 스프레드&rsquo;(10년물 국채금리와 연방기금금리의 차이) 정상화였는데, 이는 경기가 좋아져서가 아니라 <strong>연준이 금리를 내려서</strong> 일어난 효과였습니다. 연준이 인상으로 돌아선 9월에도 LEI가 버틴 데 대해, 컨퍼런스보드는 경제가 &ldquo;소비 지출에서 기업 투자 쪽으로 무게가 옮겨가며&rdquo; 성장하고 있다고 설명했습니다.</p>
+    <p>컨퍼런스보드는 2026년 실질 GDP 성장률 전망을 <strong>2.2%</strong>로 올렸습니다(2027년 2.0%, 둘 다 이전 전망보다 상향). 정리하면 지금 미국 경제는 이런 모양입니다 &mdash; <strong>소비자는 지쳤고, 기업의 AI 투자가 그 빈자리를 메우고 있으며, 자산 가격은 후자만 보고 달려왔습니다.</strong> 이번 주에는 그 &lsquo;AI 투자&rsquo; 쪽에 대한 의심이 주가 급락으로 터져 나왔고, 반대로 고용·소비심리는 예상보다 나았습니다. K자의 두 갈래가 처음으로 서로를 향해 움직인 한 주입니다.</p>
+    <div class="callout">
+      <h3>K자 경제 &mdash; 같은 나라, 두 개의 경기</h3>
+      <p>소비자심리 51.0(11월 예비)은 &ldquo;전 국민이 똑같이 힘들다&rdquo;는 뜻이 아닙니다. 자산(주식·집)을 가진 쪽은 사상 최고의 자산 가격을 누리고, 자산 없이 월급과 물가에 노출된 쪽은 4%안팎의 인플레이션(9월 3.7%, 10월은 전월비 +0.4%로 추정 전년비 약 4.2%)과 9월에 월 6.0만 명(수정치)까지 둔화했던 고용 증가, 여기에 최근 재상승한 기름값까지 겹쳐 체감 물가 부담이 커졌습니다. 10월 고용이 +16.5만으로 반등한 것은 아래쪽에 좋은 소식이지만, 두 경험의 평균은 여전히 51.0(11월 예비)이라는 낮은 숫자입니다.</p>
+      <p>사이클 관점에서 중요한 건 이겁니다. <strong>소비는 미국 GDP의 약 3분의 2입니다.</strong> AI 설비투자가 아무리 커도 소비를 대체할 수는 없습니다. 그래서 이 괴리는 둘 중 하나로 끝납니다 &mdash; 고용과 소비가 회복돼 아래쪽이 위쪽을 따라잡거나(시나리오 A), 소비 약세가 결국 기업 실적으로 번져 위쪽이 아래쪽으로 내려오거나(시나리오 B·C).</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <h2>다섯 개 축으로 본 현재 위치</h2>
+      <span class="note">0(안정) → 100(과열) · 정성 종합평가</span>
+    </div>
+    <div class="position-grid">
+      <div class="radar-card">
+        <svg id="radarChart" viewBox="0 0 400 400" role="img" aria-label="밸류에이션 95, 레버리지 85, 신용 안일도 90, 투자자 심리 45, 실물 펀더멘털 30의 과열도를 나타낸 방사형 차트. 밸류에이션·레버리지·신용 축은 극단이고 실물 축만 깊게 꺼져 있음"></svg>
+      </div>
+      <div class="position-text">
+        <h3>한쪽으로 심하게 찌그러진 그림</h3>
+        <p>밸류에이션·레버리지·신용 축은 바깥 끝까지 뻗어 있는데, <strong>실물 펀더멘털 축만 안쪽으로 깊게 꺼져 있습니다.</strong> 금융시장은 사이클의 마지막 단계에 와 있는데 실물경제는 전혀 과열이 아닌, 심하게 비대칭적인 모양입니다.</p>
+        <p>몇 주 전까지는 <strong>투자자 심리(탐욕)와 소비자 심리(하위 1%)가 정반대</strong>라는 점이 이번 사이클의 지문이었습니다. 지난 회차 공포탐욕지수가 &lsquo;극단적 공포&rsquo;로 내려오면서 투자자 심리 점수를 70&rarr;45로 낮췄고, 지난주까지 23 안팎의 극단적 공포가 이어졌고, 이번 주 반등으로 &lsquo;공포&rsquo; 구간으로 올라섰지만 45를 유지했습니다 &mdash; 심리는 식었는데 <strong>밸류에이션·레버리지는 그대로 극단</strong>이라는 점이 지금의 특징입니다. 1999년 말이나 2021년 말처럼 연준이 금리를 올리는 쪽으로 돌아섰다는 점은 여전히 닮아 있습니다.</p>
+        <p style="font-size:13px;color:var(--muted);margin-top:10px">※ 이 다섯 점수는 측정값이 아니라 아래 지표들을 종합한 <strong>제 주관적 평가</strong>입니다. 아래 카드의 실제 숫자를 기준으로 보세요. 지난 회차에 10월 고용 서프라이즈(+16.5만, 실업률 4.1%)와 소비자심리 반등(51.0)을 반영해 &lsquo;실물 펀더멘털&rsquo;을 25&rarr;30으로 올렸고, 이번 회차에는 점수를 바꾸지 않았습니다.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <h2>지표로 확인하는 현재값</h2>
+      <span class="note">거시 2026년 9~11월분 · 시장 11/13</span>
+    </div>
+    <div class="grid" id="cardGrid"></div>
+  </section>
+
+  <section>
+    <div class="section-head"><h2>초보자를 위한 사이클 4단계</h2></div>
+    <p class="lede">하워드 막스가 즐겨 쓰는 구분입니다. 사이클은 보통 &ldquo;바닥 → 회복 → 확장 → 과열&rdquo;을 반복하며, 각 단계마다 돈의 심리가 달라집니다.</p>
+    <div class="framework">
+      <div class="phase"><div class="tag">Phase 1</div><h4>바닥</h4>
+        <p>비관이 극에 달해 좋은 자산도 헐값. &ldquo;다시는 회복 안 될 것&rdquo;이라는 공포가 지배.</p></div>
+      <div class="phase"><div class="tag">Phase 2</div><h4>회복</h4>
+        <p>실적과 경기가 살아나기 시작하지만 투자자들은 여전히 의심. 저평가가 서서히 해소.</p></div>
+      <div class="phase"><div class="tag">Phase 3</div><h4>확장</h4>
+        <p>낙관이 자리 잡고 밸류에이션이 정상 범위로 올라섬. 레버리지가 서서히 늘어남.</p></div>
+      <div class="phase active"><div class="tag">Phase 4</div><h4>과열</h4>
+        <p>&ldquo;이번엔 다르다&rdquo;는 이야기가 힘을 얻고, 빚을 내서라도 사려는 수요가 몰림. 밸류에이션·레버리지가 극단치로.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <h2>대통령 사이클 &mdash; 4년마다 반복되는 리듬</h2>
+      <span class="note">S&amp;P 500 연평균 · 1950–2023</span>
+    </div>
+    <p class="lede">미국 증시에는 대통령 임기 4년에 맞춰 도는 리듬이 있습니다. 새 정부가 인기 없는 정책(긴축·구조조정)을 임기 초반에 몰아 쓰고, 재선을 앞둔 3년차에 부양책을 쏟아붓는 경향 때문이라는 설명이 일반적입니다. <strong>지금은 그 4년 중 통계적으로 가장 약한 해인 2년차, 중간선거의 해입니다.</strong></p>
+    <div class="chart-card">
+      <div class="chart-scroll" id="presWrap">
+        <svg id="presChart" viewBox="0 0 860 320" preserveAspectRatio="xMidYMid meet" role="img" aria-label="대통령 임기 1~4년차별 S&P 500 평균 연간 수익률 막대 차트. 3년차가 약 16퍼센트로 가장 높고 2년차가 4.6퍼센트로 가장 낮음"></svg>
+      </div>
+      <p class="chart-note">Motley Fool 집계(1950–2023)의 &ldquo;1·2년차 합계 12.5%, 3·4년차 합계 24.5%, 2년차 4.6%&rdquo;를 기준으로 재구성했고, 3·4년차 개별 배분은 통상 인용되는 값을 적용한 근사치입니다. 집계마다 수치는 달라집니다 &mdash; Sequoia(1932~)는 중간선거년 5.8%, BlackRock은 7.5%. <strong>다만 &ldquo;2년차가 가장 약하고 3년차가 가장 강하다&rdquo;는 순서는 모든 집계에서 동일합니다.</strong></p>
+    </div>
+    <div class="stat-row three" style="margin-top:16px">
+      <div class="stat">
+        <span class="k neg">&minus;19%</span>
+        <span class="v">중간선거년의 <strong>평균 연중 최대낙폭</strong>(1932년 이후). 4년 중 가장 험한 해로, 큰 흔들림 자체가 이 해의 특징입니다.</span>
+      </div>
+      <div class="stat">
+        <span class="k pos">+31%</span>
+        <span class="v">중간선거년 <strong>저점 이후 12개월</strong> 평균 상승률. 사이클 전체에서 가장 강력한 구간입니다.</span>
+      </div>
+      <div class="stat">
+        <span class="k">11/3</span>
+        <span class="v">2026년 중간선거일. 역사적으로 <strong>선거 약 한 달 전</strong>부터 반등이 시작되는 패턴이 반복됐습니다.</span>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <h2>계절성 사이클 &mdash; 1년 안에서의 리듬</h2>
+      <span class="note">SPY 월별 평균 · 1993년 이후</span>
+    </div>
+    <p class="lede">&ldquo;Sell in May and go away&rdquo;라는 오래된 격언이 있지만, 실제 데이터로 보면 5월은 오히려 플러스(+1.21%)입니다. 진짜 약한 달은 <strong>9월</strong>입니다. 평균이 마이너스인 달은 9월(&minus;0.90%)과 2월(&minus;0.02%) 둘뿐인데, 2월은 사실상 0에 가까워서 <strong>의미 있게 마이너스인 달은 9월 하나뿐</strong>입니다. 반대로 11월이 +2.44%로 가장 강합니다.</p>
+    <div class="chart-card">
+      <div class="chart-scroll" id="seasonWrap">
+        <svg id="seasonChart" viewBox="0 0 860 320" preserveAspectRatio="xMidYMid meet" role="img" aria-label="1월부터 12월까지 SPY 월별 평균 수익률 막대 차트. 9월이 마이너스 0.9퍼센트로 최악, 11월이 플러스 2.44퍼센트로 최고"></svg>
+      </div>
+      <div class="chart-legend">
+        <span><i class="sq" style="background:var(--critical)"></i>9월 · 연중 최약</span>
+        <span><i class="sq" style="background:var(--good)"></i>11월 · 연중 최강</span>
+        <span><i class="sq" style="background:var(--muted);opacity:.45"></i>나머지 달</span>
+      </div>
+      <p class="chart-note">표본은 월별 약 33년치입니다. 표본이 적을수록 &lsquo;평균&rsquo;의 신뢰구간은 넓어집니다.</p>
+    </div>
+
+    <div class="callout">
+      <h3>두 개의 달력이 지금 같은 곳을 가리킨다</h3>
+      <p>여기서 흥미로운 일이 벌어집니다. <strong>대통령 사이클(4년짜리 달력)과 계절성(1년짜리 달력)이 2026년 9~10월에 정확히 겹쳤습니다.</strong> 4년 중 가장 험한 해의, 1년 중 가장 약한 달이었습니다. 실제로 그 구간은 박스권 횡보로 지나갔고, 정작 큰 흔들림은 통계상 가장 강한 달인 <strong>11월 초</strong>(11/5 하루 &minus;4.4%)에 왔습니다 &mdash; 평균은 평균일 뿐이라는 좋은 예입니다.</p>
+      <p>다만 같은 통계가 정반대 이야기도 합니다. 이 구간을 지나면 <strong>중간선거 저점 → 이후 12개월</strong>이라는, 4년 사이클 전체에서 가장 강한 구간이 곧바로 이어집니다. 역사적 패턴만 놓고 보면 &ldquo;가을에 한 번 흔들리고 겨울부터 간다&rdquo;는 그림이고, 이는 아래 <strong>시나리오 B(조정 후 재상승)</strong>에 가장 큰 힘을 실어줍니다.</p>
+      <p style="font-size:13.6px;color:var(--muted)">주의: 계절성과 대통령 사이클은 <em>평균</em>일 뿐 법칙이 아닙니다. 표본이 20~30회 남짓이라 개별 연도의 편차가 평균보다 훨씬 큽니다. 방향을 정하는 근거가 아니라, 다른 지표가 보내는 신호의 무게를 조정하는 참고자료로 쓰는 게 맞습니다.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head"><h2>세 갈래 시나리오</h2></div>
+    <p class="lede">사이클 예측은 &ldquo;언제 정확히&rdquo;를 맞히는 게임이 아니라 &ldquo;어느 쪽에 확률이 실려 있는가&rdquo;를 가늠하는 작업입니다. 아래는 현재 데이터가 가리키는 세 가지 경로입니다.</p>
+    <div class="scenarios">
+      <div class="scenario">
+        <span class="prob">경로 A · 연착륙 랠리 지속</span>
+        <h4>천천히 식힌다</h4>
+        <p>물가 둔화로 실질소득이 회복되면서 <strong>바닥에 있는 소비자심리가 위로 따라 올라오는</strong> 경로. AI 투자가 버텨주는 동안 소비가 회복되면 K자의 아래쪽이 위쪽에 수렴합니다. <strong>9/16 연준의 재인상으로 이 경로의 전제(완만한 인하 지속·금리 안정)는 크게 흔들렸습니다.</strong> 다만 10월 고용(+16.5만)이 강하게 반등하고 소비자심리가 51.0으로 올라선 것은 &ldquo;아래쪽이 위쪽을 따라 올라오는&rdquo; 이 경로에 힘을 보탭니다. 문제는 그 사이 위쪽(AI 주가)이 먼저 흔들리고 있다는 점입니다.</p>
+        <div class="trigger">신호: 미시간 심리 60선 회복(11월 예비 51.0, 미충족), 10년물 4.2% 아래 안착(현재 일간 5.10%, 미충족 &mdash; 오히려 멀어짐), 고용 증가폭 재가속(10월 +16.5만 &mdash; <strong>충족</strong>), LEI 6개월 변화율 플러스 전환(9월 +0.6% &mdash; <strong>충족</strong>, 4개 중 2개)</div>
+      </div>
+      <div class="scenario">
+        <span class="prob">경로 B · 조정 후 재상승</span>
+        <h4>한번 털고 간다</h4>
+        <p>과열된 밸류에이션·레버리지가 10~20%대 조정으로 해소된 뒤, 여전히 견조한 펀더멘털 위에서 다시 확장 국면으로 이어지는 경로. <strong>중간선거년 평균 낙폭 &minus;19% → 저점 이후 12개월 +31%</strong>라는 대통령 사이클 패턴이 정확히 이 모양이라, 세 경로 중 역사적 근거가 가장 두텁습니다.</p>
+        <div class="trigger">신호: 10~20%대 조정 진행(고점 대비 11/5 &minus;5.9%까지 갔다가 현재 &minus;3.2% &mdash; 아직 미충족), 마진부채 감소 전환(9월까지는 증가, $1.48조 &mdash; 10월분은 11월 중순 발표), 공포탐욕지수 &lsquo;극단적 공포&rsquo; 진입 후 반등(10/23~11/6 20~23대 극단적 공포 후 이번 주 &lsquo;공포&rsquo; 구간으로 상승 &mdash; <strong>진입·반등 모두 충족</strong>, 다만 조정 폭이 얕아 &lsquo;털고 간다&rsquo;고 보기엔 아직 이릅니다)</div>
+        <div class="trigger" style="border-top:none;padding-top:0">소비 약세가 기업 실적에 번지더라도 <strong>고용이 무너지지는 않는</strong> 경우가 여기입니다.</div>
+      </div>
+      <div class="scenario">
+        <span class="prob">경로 C · 레버리지 되감김</span>
+        <h4>신용이 막힌다</h4>
+        <p>신용스프레드가 정상화(400bp+)되기만 해도 고평가 자산엔 충격입니다. 여기에 <strong>바닥권 소비심리가 실제 소비 감소로 전이되고</strong> AI 투자마저 식으면, 유일한 버팀목이 사라지며 마진콜이 마진콜을 부르는 국면. <strong>11/5 AI 반도체주 급락은 이 경로의 &lsquo;AI 투자마저 식으면&rsquo;이라는 조건을 처음으로 시장이 가격에 반영하기 시작한 사건</strong>일 수 있습니다. 다만 신용스프레드는 급락 당일(11/5) 348bp까지 넓어졌다가 11/12 320bp로 다시 좁아져 350bp 1차 경보선을 끝내 넘지 않았고, 실업률은 오히려 4.1%로 내려와 확률은 여전히 낮은 편으로 봅니다. 연준 내 인상 주장(10/28 반대 2표)으로 완화 여지가 적다는 점은 이 경로를 막아줄 안전판이 약하다는 뜻이기도 합니다.</p>
+        <div class="trigger">신호: HY 스프레드 400bp 돌파(350bp부터 1차 경보, 현재 320bp &mdash; 11/5 고점 348bp), LEI 6개월 변화율 &minus;4.3% 임계 하향, 실업률 반년새 0.5%p 이상 상승(현재 6개월 변화 &minus;0.2%p &mdash; 4월 4.3%→10월 4.1%)</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head"><h2>앞으로 무엇을 확인해야 할까</h2></div>
+    <div class="watchlist">
+      <div class="watch-item">
+        <span class="sig" style="background:var(--critical-soft);color:var(--critical)">①</span>
+        <p><strong>하이일드 스프레드(320bp)가 다시 350bp를 향하는지.</strong> 주식보다 먼저 움직이는 경우가 많은 선행 지표입니다. 11/5 급락 당일 348bp로 350bp 경보선에 <strong>2bp 차</strong>까지 다가갔지만 넘지 않았고, 이후 11/6 342 &rarr; 11/9 334 &rarr; 11/11 330 &rarr; 11/12 320bp로 빠르게 좁아졌습니다. 즉 이번 흔들림은 지금까지 &lsquo;주식만의 조정&rsquo;(시나리오 B 쪽)으로 지나가고 있습니다. 다만 12월 금리 인상이 현실화되면 빚이 많은 기업의 조달 비용이 오르므로, 12월 FOMC 전후로 다시 확인할 숫자입니다.</p>
+      </div>
+      <div class="watch-item">
+        <span class="sig" style="background:var(--critical-soft);color:var(--critical)">②</span>
+        <p><strong>10년물 국채금리와 12월 FOMC(12/8~9).</strong> 일간 수치로는 10/28 5.05% &rarr; 11/5 4.84%로 내려왔다가, 10월 CPI(전월비 +0.4%, 핵심 +0.3%) 발표 뒤 <strong>11/12 5.10%로 다시 5% 임계선을 넘었습니다</strong>. 10월 월평균도 5.13%로 공식 확인됐습니다. 시장은 12월 0.25%p 인상 확률을 80% 이상으로 보고, 월러 이사는 0.5%p 가능성까지 열어뒀습니다. 11월 CPI는 FOMC 다음 날(12/10) 발표라, 12월 결정은 10월 물가와 11월 고용(12/4)으로 내려지게 됩니다.</p>
+      </div>
+      <div class="watch-item">
+        <span class="sig" style="background:var(--warning-soft);color:var(--warning)">③</span>
+        <p><strong>고용 반등이 일시적인지.</strong> 10월 신규 고용은 +16.5만명(예상 약 6.5만명)으로 크게 웃돌았고, 8·9월치도 합계 8.4만명 상향 수정됐습니다(9월 +2.9만&rarr;+6.0만). 실업률은 4.2%&rarr;4.1%로 내려와 6개월 누적 변화가 &minus;0.2%p &mdash; Sahm룰(+0.5%p)과는 오히려 멀어졌습니다. 전년비 기준(NSA, 계절조정 전)으로도 +92.2만명으로 늘었는데, 2025년 10월 수치가 셧다운 여파로 낮았던 기저효과가 섞여 있을 수 있어 다음 달(11월분, 12/4 발표)에도 이어지는지 확인이 필요합니다.</p>
+      </div>
+      <div class="watch-item">
+        <span class="sig" style="background:var(--critical-soft);color:var(--critical)">④</span>
+        <p><strong>미시간 소비자심리 반등이 이어지는지.</strong> 11월 예비치는 51.0으로(11/6 발표) 10월 확정 48.0보다 6.3% 올라 석 달 만의 최고였고, 45 임계선과의 거리는 6점으로 벌어졌습니다. 다만 1년 전과 같은 수준이라 여전히 역사적 최저권이고, 11/5 주가 급락 이후 응답이 확정치(11월 하순)에 얼마나 반영될지가 관건입니다.</p>
+      </div>
+      <div class="watch-item">
+        <span class="sig" style="background:var(--warning-soft);color:var(--warning)">⑤</span>
+        <p><strong>LEI 6개월 변화율의 &minus;4.3% 임계선.</strong> 9월 +0.6%로 다시 플러스 전환했습니다(8월 &minus;0.1%). 임계선과의 거리는 더 벌어졌지만, 7월에도 플러스 전환이 한 달 만에 되돌려진 적이 있어 다음 발표(10월분)에서 유지되는지 확인이 필요합니다.</p>
+      </div>
+      <div class="watch-item">
+        <span class="sig" style="background:var(--critical-soft);color:var(--critical)">⑥</span>
+        <p><strong>마진부채의 방향.</strong> 7월 &minus;5.7% 감소가 일시적 숨고르기였음이 확인된 뒤, 8월 +2.6%에 이어 9월에도 $1.48조로 늘었습니다(전월비 약 +1.8~2.1% &mdash; Advisor Perspectives는 +1.8%로 집계, 전년비 +31%). 6월 사상최고치(약 $1.50조)에 다시 다가서고 있고, 공포 심리 속에서도 레버리지 축소는 아직 시작되지 않았습니다(10월분은 11월 중순 발표).</p>
+      </div>
+      <div class="watch-item">
+        <span class="sig" style="background:var(--accent-soft);color:var(--accent)">⑦</span>
+        <p><strong>중간선거 이후의 &lsquo;저점&rsquo;.</strong> 11/3 중간선거 이후 11/5 733.00까지 밀렸다가 7월 저점(729.46)을 지키고 반등했습니다. 대통령 사이클 통계상 중간선거년에는 연중 저점 이후 12개월이 가장 강한 구간인데, <strong>11/5가 그 &lsquo;저점&rsquo;이었는지</strong>는 아직 알 수 없습니다. 박스권 하단(754) 회복이 유지되면 그 가능성이 높아지고, 733이 다시 깨지면 저점은 아직 앞에 있다고 봐야 합니다. 통계적으로 가장 강한 달인 11월이 12월 인상 우려를 이겨낼지도 관전 포인트입니다.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <h2>개정 이력</h2>
+      <span class="note">13차 개정 · 2026-11-14</span>
+    </div>
+    <div class="fixes">
+      <div class="fix"><b>13차 (2026-11-14)</b> &mdash; <span class="now">10년물 일간 4.84%→5.10%</span>(+26bp, 11/12, 5% 임계선 재돌파 &mdash; 10월 월평균 5.13%는 공식치로 확인). <span class="now">10월 CPI 전월비 +0.4%</span>(예상 +0.3%, 핵심 +0.3%), 2025년 10월 셧다운으로 공식 전년비는 미발표 &mdash; 추정 약 4.2%(9월 3.7%). 12월 인상 확률 80% 이상. <span class="now">SPY 735.29→754.37</span>(+2.59%, 고점 대비 &minus;5.62%→&minus;3.17%, 저점 대비 +13.1%→+16.0%, 20일 변동성 약 20.2%→22.3%). <span class="now">하이일드 스프레드 332bp→320bp</span>(11/12, 단 11/5 348bp로 350bp 경보선 2bp 앞까지 확대). <span class="now">공포탐욕지수 극단적 공포(23)→공포 구간</span>(정확한 수치 미확인). 미시간 11월 예비 1년 기대인플레이션 4.3%(10월 4.7%) 확인. 실업률·고용·기준금리·LEI·마진부채(10월분 미발표)·버핏지수는 새 값 없음. 개정 이력 10개 유지를 위해 가장 오래된 &lsquo;3차 추가&rsquo; 항목 정리.</div>
+      <div class="fix"><b>12차 (2026-11-07)</b> &mdash; (지난 토요일 갱신이 누락돼 10/23 대비 2주치 변화를 반영) <span class="now">SPY 759.97→735.29</span>(&minus;3.25%, 11/5 하루 &minus;4.4%, 고점 대비 &minus;2.45%→&minus;5.62%, 20일 변동성 9.8%→약 20.2%, 754~779 박스권 하향 이탈). <span class="now">10월 고용 +16.5만</span>(예상 약 6.5만, 9월 +2.9만→+6.0만 상향 수정, 상태 경고→양호), <span class="now">실업률 4.2%→4.1%</span>, 비농업고용 전년비(NSA) +50.9만→+92.2만. <span class="now">미시간 소비자심리 11월 예비 51.0</span>(10월 확정 48.0 대비 +6.3%). <span class="now">10/28 FOMC 동결(3.75~4.00%, 10&minus;2, 반대 2표는 인상 주장)</span>, 실효 기준금리 10월 3.75%→3.88%. 10년물 일간 4.96%→4.84%(&minus;12bp, 11/5), 10월 월평균 5.13%를 차트에 추가. 하이일드 스프레드 340bp→332bp(11/4, 10/30 344bp까지 확대). 공포탐욕지수 20→23(극단적 공포 유지). 레이더 &lsquo;실물 펀더멘털&rsquo; 25→30. 계절성 마커를 11월로 이동. 갱신 주기 안내를 &lsquo;매주 토요일 오전 9시&rsquo;로 수정. CPI·LEI·마진부채(10월분 미발표)·CAPE·버핏지수는 새 값 없음. 개정 이력 10개 유지를 위해 가장 오래된 &lsquo;3차 정정&rsquo; 항목 정리.</div>
+      <div class="fix"><b>11차 (2026-10-25)</b> &mdash; <span class="now">CNN 공포탐욕지수 공포(28)→극단적 공포(20)</span>(10/23, 경보 임계선 진입. 지난 회차의 28은 10/16 장중 수치였고, 종가 기준으로는 이미 18이었음을 정정). <span class="now">하이일드 스프레드 323bp→340bp</span>(+17bp, FRED 10/22, 350bp 1차 경보선까지 10bp). <span class="now">10년물 일간 5.10%→4.96%</span>(&minus;14bp, 10/22, 3주 만에 5% 아래). <span class="now">LEI 9월분 99.6, 6개월 변화율 &minus;0.1%→+0.6%</span>(확산지수 55.0, 상태 주의→양호). <span class="now">미시간 소비자심리 10월 확정 48.0</span>(예비 46.3 대비 +1.7pt, 9월 48.1과 비슷, 전년비 &minus;10.4%). SPY 763.25→759.97(&minus;0.43%, 고점 대비 &minus;2.45%, 20일 변동성 10.5%→약 9.8%). 마진부채 9월 $1.48조를 thetrading.tools로 교차 확인(전월비 약 +2.1%, 전년비 +31%). 레이더 &lsquo;투자자 심리&rsquo; 70→45로 하향. 실효 기준금리·실업률·비농업고용·CPI·CAPE·버핏지수는 새 발표분 없음. 개정 이력 10개 유지를 위해 가장 오래된 &lsquo;마진부채 정정&rsquo; 항목 정리.</div>
+      <div class="fix"><b>10차 (2026-10-18)</b> &mdash; <span class="now">CPI 전년비 3.4%→3.7%</span>(9월분, 10/14 발표, 예상 3.6% 상회, 핵심 CPI 2.4%→2.6%) &mdash; 물가 재상승으로 12월 추가 인상 가능성(약 37%)이 다시 부각. <span class="now">SPY 778.57→763.25</span>(&minus;1.97%, 고점 대비 &minus;0.07%→&minus;2.03%, 저점 대비 +19.7%→+17.4%, 20일 변동성 10.0%→약 10.5%) &mdash; 지난주 신고가 뒤 박스권 안으로 복귀. <span class="now">CNN 공포탐욕지수 중립(45)→공포(28)</span>, 극단적 공포 직전. <span class="now">하이일드 스프레드 315bp→323bp</span>(+8bp, FRED 10/15). <span class="now">10년물 일간 5.24%→5.10%</span>(&minus;14bp, FRED 10/15, 여전히 5% 위). <span class="now">마진부채 9월 약 $1.48조</span>(8월 $1.45조 대비 약 +2%, 전년비 +31.4%, GuruFocus 기준). 실효 기준금리·실업률·비농업고용·미시간 소비자심리(확정 10/23)·LEI(9월분 미발표)·CAPE·버핏지수는 새 발표분 없음. 계절성 마커를 10월 중순으로 이동. 개정 이력 10개 유지를 위해 가장 오래된 &lsquo;비농업 고용 NSA 정정&rsquo; 항목 정리.</div>
+      <div class="fix"><b>9차 (2026-10-11)</b> &mdash; <span class="now">10년물 국채금리 일간 수치 5.24%(10/9)</span>를 새로 표기 &mdash; 5% 임계선 돌파. 지난 회차는 9월 월평균(4.99%)만 보고 &ldquo;5% 바로 아래&rdquo;라고 서술했으나 일간 수치는 10/2에 이미 5.28%였음을 확인해 정정(월평균 4.99%는 그대로 유효). <span class="now">미시간 소비자심리 10월 예비치 46.3</span>(9월 확정 48.1 대비 &minus;1.8pt, 다섯 달 만의 최저, 45 임계선까지 1.3점, 1년 기대인플레이션 4.6%→4.7%). <span class="now">SPY 769.64→778.57</span>(+1.16%, 10/6 종가 779.09로 8/13 고점 777.88을 넘어 신고가), 20일 실현변동성 10.2%→약 10.0%. <span class="now">하이일드 스프레드 324bp→315bp</span>(&minus;9bp, 지난주 확대가 이어지지 않음). <span class="now">CNN 공포탐욕지수 공포(31)→중립(45)</span>(8월 말 이후 첫 중립). 실러 CAPE 41.1→41.2배(변화 없음 수준). 실효 기준금리·실업률·비농업고용·CPI·LEI·마진부채·버핏지수는 새 발표분 없음(9월 CPI는 10/14, LEI·마진부채 9월치는 10월 하순 예정). 계절성 차트의 현재 위치 표시를 10월로 이동.</div>
+      <div class="fix"><b>8차 (2026-10-02)</b> &mdash; <span class="now">10년물 국채금리 4.68%→4.99%</span>(9월 공식치, +31bp, 거의 20년 만의 최고권, 5% 임계선 바로 아래). <span class="now">하이일드 스프레드 280bp→324bp</span>(+44bp, 이 리포트 추적 이래 최대 주간 변동, 350bp 임계선과는 아직 26bp). <span class="now">9월 고용보고서</span> 발표 — 신규고용 월 +2.9만(예상 8.4만~9.0만 대비 크게 미달), 실업률 4.1%→4.2%, 비농업고용 전년비(NSA)는 +45.6만→+50.9만(레벨 기준, BLS 정례 수정 영향 혼재). <span class="now">실효 기준금리 3.63%→3.75%</span>(9월 공식치, 9/16 FOMC 인상 반영). 약한 고용 수치로 12월 추가 인상 기대가 낮아지며 SPY는 765.55→769.64(+0.53%)로 반등, 20일 실현변동성 11.1%→약 10.2%로 하락. 그런데도 CNN 공포탐욕지수는 37→31로 더 깊은 공포 구간에 진입. <span class="now">버핏지수 288%</span>(2026년 2분기 공식 Z.1 발표, 사상 최고·100번째 백분위수 — 기존 &ldquo;250~290%, 미확인&rdquo; 범위를 대체하는 첫 확정치, 시장종가 추정치는 294%). 실러 CAPE 41.2→41.07배(노이즈 수준 변동). CPI·LEI·마진부채·미시간 소비자심리는 이번 회차 새 발표분 없음(각각 8~9월 값 유지, 다음 발표일 예정대로 진행 — 조사 결과 셧다운에 따른 지연은 없음을 확인). 경보 임계선 돌파 없음(단 10년물 5% 선에 근접).</div>
+      <div class="fix"><b>7차 (2026-09-28)</b> &mdash; <span class="now">미시간 소비자심리 9월 확정치 48.1</span> 발표(예비치 47.8보다 소폭 상향, 8월 확정 51.7 대비 &minus;3.6pt 하락, 1년 기대인플레이션 4.0%→4.6%). <span class="now">하이일드 스프레드 268bp→280bp</span>(+12bp, 3주 연속 압축 후 첫 반등, 350bp 임계선과는 아직 거리). SPY 773.50→765.55(&minus;1.03%, 761~778 박스권 하단으로 재이동), 고점 대비 낙폭 &minus;0.56%→&minus;1.59%, 20일 실현변동성 10.6%→11.1%로 소폭 추가 상승. CNN 공포탐욕지수 공포(34)→공포(37)로 소폭 회복(여전히 공포 구간). 실러 CAPE는 데이터 소스 갱신으로 40.7→41.2배로 소폭 상향(같은 9월 초 기준일, 실질적 시장 변동은 미미). 실효 기준금리·10년물·실업률·비농업고용·CPI·LEI·마진부채·버핏지수는 이번 회차 새 월간 발표분 없음(값 동일).</div>
+      <div class="fix"><b>6차 (2026-09-22)</b> &mdash; <span class="now">연준이 9/16 FOMC에서 기준금리를 3.75~4.00%로 0.25%p 인상</span>(2023년 이후 첫 인상, 1년 가까운 인하 사이클 반전, 물가가 목표까지 못 내려온 게 이유, 12월 추가 인상 가능성도 시사) &mdash; 이번 주 가장 큰 변화이며 &ldquo;연준은 내리는데 장기금리는 오른다&rdquo; 서술을 전면 재작성. <span class="now">CNN 공포탐욕지수 탐욕(55)→공포(34)</span>(5주 만에 신뢰 가능한 값 확인, 금리 인상 충격으로 급반전). <span class="now">LEI 6개월 변화율 +0.2%→&minus;0.1%</span>(8월 신규 발표, 한 달 만에 재차 마이너스 전환, 확산지수 75.0→55.0). <span class="now">마진부채 $1.42조→$1.45조</span>(8월 신규 발표, 전월 감소가 일시적이었음이 확인, +2.6% 반등, 전년비 +37.2%). SPY 764.29→773.50(9/16 인상 당일 754선까지 하락 후 반등, +1.21%), 20일 실현변동성 8.7%→10.6%(3주 만의 최고치). 하이일드 스프레드 270bp→268bp(사실상 보합, 금리 인상에도 무반응). 실효 기준금리·10년물·실업률·비농업고용·CPI·CAPE·버핏지수는 이번 회차 새 월간 발표분 없음(값 동일, 단 기준금리는 위 FOMC 결정으로 실질적 방향 전환).</div>
+      <div class="fix"><b>5차 (2026-09-14)</b> &mdash; <span class="now">미시간 소비자심리 9월 예비치 47.8</span> 발표(8월 확정 51.7 대비 &minus;3.9pt·&minus;7.5% 급락, 45 임계선까지 3점 — 예비치라 확정 발표에서 조정 가능. 기대지수는 45.8로 더 크게 하락, 1년 기대인플레이션 4.0%→4.6%). <span class="now">하이일드 스프레드 265bp→270bp</span>(+5bp, 3주 연속 압축 후 첫 반등). <span class="now">CPI 전년비 8월 신규 발표 3.4%</span>(7월과 동일, 핵심 CPI는 2.5%→2.4%로 소폭 둔화). SPY 770.19→764.29(&minus;0.77%, 761~778 박스권 하단), 20일 실현변동성 약 8.1%→8.7%로 3주 만에 첫 반등. 레이더 &lsquo;실물 펀더멘털&rsquo; 30→25로 하향. 기준금리·10년물·실업률·비농업고용·LEI·마진부채·CAPE·버핏지수는 이번 회차 새 발표분 없음(값 사실상 동일).</div>
+      <div class="fix"><b>4차 (2026-09-06)</b> &mdash; 밀려 있던 2주치 갱신을 한 번에 반영. <span class="was">장단기 금리차(10Y&minus;3M)</span> 지표는 사용자 요청으로 페이지에서 완전히 제거했습니다. <span class="now">LEI 99.1→99.5</span>(6개월 &minus;0.3%→+0.2%, 4년여 만에 플러스 전환, 확산지수 55→75, 상태 주의→양호), <span class="now">미시간 소비자심리 8월 확정 51.7</span>(예비 51.0 대비 소폭 상향, 여전히 사상 최저권), <span class="now">10년물 국채금리 4.60%→4.68%</span>(연준 인하에도 추가 상승), <span class="now">비농업고용 전년비 +38.2만→+45.6만</span>(8월 신규 발표 + BLS 정례 수정치 반영, 둔화 추세는 유지되나 완만해짐), <span class="now">하이일드 스프레드 275bp→265bp</span>(안일함 심화), <span class="now">SPY 765.72→770.19</span>, 20일 실현변동성 12.8%→약 8.1%로 추가 하락.</div>
+          </div>
+  </section>
+
+  <section>
+    <div class="section-head"><h2>출처와 갱신에 대해</h2></div>
+    <div class="source-box">
+      <p style="margin:0 0 12px;color:var(--ink-soft)"><strong style="color:var(--ink)">갱신 주기 &mdash; 매주 토요일 오전 9시(한국시간).</strong> 예약 작업이 매주 모든 지표를 다시 조회해 이 페이지를 같은 주소에 덮어씁니다. 지표별로 실제 바뀌는 속도는 다릅니다: 주가·신용스프레드·공포탐욕지수는 매일, 소비자심리는 월 2회(예비·확정), LEI와 고용·CPI는 월 1회, 마진부채는 월 1회에 약 3주 지연입니다. 실러 PER·버핏지수는 천천히 움직이고, 대통령 사이클·계절성 통계는 사실상 고정값이라 주간 갱신에서 거의 바뀌지 않습니다.</p>
+      <p style="margin:0 0 12px;color:var(--ink-soft)">공유해주신 <code>marketcycleview.com/ko</code>는 결제가 필요한 페이지(HTTP 402)로 막혀 있었고, 연결된 네이버 블로그 글도 자동 조회가 차단되어 직접 확인하지 못했습니다. 그래서 그 도구가 표방하는 18개 지표 카테고리(버블지수·빚투지표·유동성지표·신용경색지표·공포탐욕지수 백테스트 등)의 <em>개념</em>을 참고해, 같은 종류의 정보를 얻을 수 있는 공개 데이터로 재구성했습니다. 원본 도구의 자체 스코어링 로직과 설문 기반 심리지표까지 재현한 것은 아닙니다.</p>
+      <p style="margin:0">데이터 출처 &mdash; 기준금리·10년물·실업률·비농업고용(2026.10 공식치): <a href="https://www.alphavantage.co" target="_blank" rel="noopener">Alpha Vantage</a> / <a href="https://fred.stlouisfed.org" target="_blank" rel="noopener">FRED</a> · 10년물 일간 수치(11/12 5.10%)·10월 월평균 5.13%(공식 월간치): Alpha Vantage · 10월 고용보고서: <a href="https://www.bls.gov/news.release/empsit.nr0.htm" target="_blank" rel="noopener">BLS(2026.11.06)</a> · 10월 CPI: <a href="https://www.bls.gov/news.release/cpi.htm" target="_blank" rel="noopener">BLS(2026.11.10)</a>, <a href="https://kpmg.com/us/en/articles/2026/october-2026-cpi.html" target="_blank" rel="noopener">KPMG(추정 전년비 약 4.2%)</a>, <a href="https://stockanalysis.com/news/us-cpi-rises-october-2026/" target="_blank" rel="noopener">StockAnalysis(12월 인상 확률·월러 발언)</a> · 하이일드 일별(11/5 3.48%, 11/12 3.20%): <a href="https://equibles.com/economicdata/bamlh0a0hym2/2026-11-12" target="_blank" rel="noopener">Equibles(FRED 시리즈 미러)</a> · 미시간 11월 기대인플레이션: <a href="https://stockanalysis.com/news/consumer-sentiment-rises-november-2026/" target="_blank" rel="noopener">StockAnalysis(2026.11.06)</a> · 11/5 급락 원인: <a href="https://spectrumlocalnews.com/us/snplus/business/2026/11/05/stock-market-ai-chip-selloff" target="_blank" rel="noopener">Spectrum News/AP(2026.11.05)</a> · 10/28 FOMC: <a href="https://admiralmarkets.com/analytics/traders-blog/fomc-october-2026-fed-holds-rates" target="_blank" rel="noopener">Admiral Markets</a>, <a href="https://www.xtb.com/en/market-analysis/fed-holds-eurusd-gains" target="_blank" rel="noopener">XTB(2026.10.28)</a> · 주간 시장 요약(공포탐욕 23·VIX): <a href="https://myweeklystock.substack.com/p/weekly-market-recap-nov-2-6-s-and" target="_blank" rel="noopener">My Weekly Stock(11/2~6)</a>, <a href="https://feargreedflow.com/" target="_blank" rel="noopener">feargreedflow(11/6, 22)</a> · 10/23 시장 동향·12월 인상 확률·유가: <a href="https://www.eoption.com/market-review-october-23-2026/" target="_blank" rel="noopener">eoption 시장 리뷰(2026.10.23)</a> · 10년물 20년래 최고권 보도: <a href="https://www.cnbc.com/2026/09/26/10-year-treasury-yield-is-at-its-highest-in-19-years-how-we-got-here.html" target="_blank" rel="noopener">CNBC(2026.09.26)</a> · 9월 고용보고서 시장 반응: <a href="https://www.fool.com/coverage/stock-market-today/2026/10/02/stock-market-midday-oct-2-stocks-rally-as-weak-jobs-data-cools-fed-rate-hike-bets/" target="_blank" rel="noopener">The Motley Fool(2026.10.02)</a> · SPY 일별 시세: Alpha Vantage · CPI: <a href="https://www.advisorperspectives.com/dshort/updates/2026/10/14/cpi-consumer-price-index-inflation-september-2026" target="_blank" rel="noopener">BLS / Advisor Perspectives(2026.10.14, 9월분 3.7%)</a> · Shiller CAPE: <a href="https://www.gurufocus.com/economic_indicators/56/sp-500-shiller-cape-ratio" target="_blank" rel="noopener">GuruFocus(2026.10.11 조회, 10/1 기준 41.18)</a> · 버핏지수: <a href="https://www.thetrading.tools/buffett-indicator" target="_blank" rel="noopener">thetrading.tools(2026 Q2 공식치 288%, 10/2 시장종가 추정 294%)</a> · 마진부채: <a href="https://www.advisorperspectives.com/dshort/updates/2026/09/17/margin-debt-finra-august-2026" target="_blank" rel="noopener">FINRA / Advisor Perspectives(2026.09.17, 8월분)</a>, <a href="https://www.gurufocus.com/economic_indicators/4264/finra-investor-margin-debt" target="_blank" rel="noopener">GuruFocus(9월분 $1.48조)</a>, <a href="https://www.thetrading.tools/margin-debt" target="_blank" rel="noopener">thetrading.tools(9월분 $1.48조, 전년비 +31%)</a> · 하이일드 스프레드: <a href="https://fred.stlouisfed.org/series/BAMLH0A0HYM2" target="_blank" rel="noopener">ICE BofA / FRED</a> (2026.11.12 기준 3.20%) · 공포탐욕지수: <a href="https://www.cnn.com/markets/fear-and-greed" target="_blank" rel="noopener">CNN</a> 수치를 인용한 <a href="https://www.benzinga.com/markets/market-summary/26/10/62431244/nasdaq-tumbles-over-2-records-weekly-loss-investor-sentiment-weakens-fear-greed-index-moves-to-extreme-fear-zone" target="_blank" rel="noopener">Benzinga(2026.10.19, 10/16 종가 18)</a>, <a href="https://www.eoption.com/market-review-october-23-2026/" target="_blank" rel="noopener">eoption(2026.10.23, 20)</a> · LEI: <a href="https://www.prnewswire.com/news-releases/the-conference-board-leading-economic-index-lei-for-the-us-was-flat-in-september-302917003.html" target="_blank" rel="noopener">The Conference Board(2026.10.22 보도자료, 9월분)</a> · 미시간 소비자심리: <a href="https://www.advisorperspectives.com/dshort/updates/2026/10/23/consumer-sentiment-at-five-month-low" target="_blank" rel="noopener">U. of Michigan / Advisor Perspectives(2026.10.23, 10월 확정치)</a>, <a href="https://collisionweek.com/2026/11/06/consumer-sentiment-rises-6-3-three-month-high-preliminary-november-reading/" target="_blank" rel="noopener">CollisionWeek(2026.11.06, 11월 예비 51.0)</a> · 대통령 사이클: <a href="https://www.fool.com/investing/2025/12/13/what-does-the-presidential-election-cycle-say-the" target="_blank" rel="noopener">Motley Fool</a>, <a href="https://www.sequoia-financial.com/insights/the-midterm-year-roadmap-what-history-tells-us-about-2026/" target="_blank" rel="noopener">Sequoia Financial</a>, <a href="https://www.blackrock.com/us/financial-professionals/insights/2026-midterm-elections-and-market-performance" target="_blank" rel="noopener">BlackRock</a> · 계절성: <a href="https://www.thetrading.tools/seasonality" target="_blank" rel="noopener">thetrading.tools</a></p>
+    </div>
+    <p class="disclaimer">이 페이지는 투자 자문이 아니라 &lsquo;사이클을 읽는 연습&rsquo;을 위한 교육 자료입니다. 여기 담긴 시나리오는 확률적 가능성이지 예측이 아니며, 실제 투자 판단은 최신 지표를 다시 확인하고 본인의 상황에 맞게 내리시길 권합니다.</p>
+  </section>
+
+  <footer>MARKET CYCLE VIEW — 참고용 리포트 · 2026-11-14 개정</footer>
+</div>
+
+<script>
+(function(){
+  var svgNS="http://www.w3.org/2000/svg";
+  var cs=getComputedStyle(document.documentElement);
+  function tok(n,f){ return (cs.getPropertyValue(n)||'').trim()||f; }
+  var S1=tok('--s1','#A97B2F'), S2=tok('--s2','#2D6A9F');
+  var accentCol=tok('--accent','#A97B2F'), accentSoft=tok('--accent-soft','#EFE2C8');
+  var mutedCol=tok('--muted','#6B7280'), lineColor=tok('--line','#D8D7CC');
+  var inkSoft=tok('--ink-soft','#3A4557'), inkCol=tok('--ink','#16223A');
+  var goodCol=tok('--good','#2E7D5B'), critCol=tok('--critical','#B23A34');
+
+  function el(name,attrs){ var e=document.createElementNS(svgNS,name);
+    for(var k in attrs){ e.setAttribute(k,attrs[k]); } return e; }
+  function mkTip(wrap){ var t=document.createElement('div'); t.className='tip'; wrap.appendChild(t); return t; }
+  // place tooltip beside the anchor, flipping to the other side near the edge
+  function placeTip(tip, svg, anchorFrac, topPx, rightGuardFrac){
+    var sw=svg.getBoundingClientRect().width;
+    var right=sw*(1-(rightGuardFrac||0));
+    var px=anchorFrac*sw, tw=tip.offsetWidth, lx=px+14;
+    if(lx+tw > right-4) lx = px-tw-14;
+    if(lx < 4) lx = 4;
+    tip.style.left=lx+'px'; tip.style.top=topPx+'px';
+  }
+
+  /* ══════════════════════════════════════════════════════════════════════════
+     주간 갱신 슬롯 — 매주 자동 작업은 이 WEEK 객체만 고쳐 쓰면 됩니다.
+
+     changes 항목 형식:
+       { label:'지표명',
+         note :'왜 중요한지 한 줄 (생략 가능)',
+         prev :'지난주 값', now:'이번주 값', delta:'차이 표기',
+         dir  :'up' | 'down' | 'flat',      // 값이 오르내린 방향 (화살표)
+         sev  :'worsen' | 'improve' | 'neutral',  // 위험 방향인지 (색상)
+         alert: true }                       // 임계선 돌파 시. 강조 + 맨 위로 정렬
+
+     예) { label:'하이일드 스프레드', note:'350bp 임계선 돌파',
+           prev:'275bp', now:'361bp', delta:'+86bp',
+           dir:'up', sev:'worsen', alert:true }
+
+     ※ dir와 sev는 별개입니다. 스프레드가 오르면 dir:'up'이지만 sev는 'worsen'이고,
+       실업률이 내리면 dir:'down'이지만 sev는 'improve'입니다.
+     ※ changes가 빈 배열이면 '기준선' 안내가 대신 표시됩니다.
+     ══════════════════════════════════════════════════════════════════════════ */
+  var WEEK = {
+    prevDate: '2026-11-06',
+    thisDate: '2026-11-13',
+    changes: [
+      {label:'10년물 국채금리 (일간)', note:'10월 CPI가 예상을 웃돌자 다시 뛰어 5% 임계선 재돌파. 고평가 주식에 할인율 압력. 10월 월평균 5.13%도 공식 확인',
+       prev:'4.84%(11/5)', now:'5.10%(11/12)', delta:'+26bp', dir:'up', sev:'worsen', alert:true},
+      {label:'CPI (10월분 신규)', note:'전월비 +0.4%(예상 +0.3%), 핵심 +0.3%(예상 +0.2%). 셧다운으로 공식 전년비 미발표 — 추정치(KPMG). 12월 인상 확률 80%+',
+       prev:'3.7%(9월 전년비)', now:'약 4.2%(10월 추정)', delta:'약 +0.5%p', dir:'up', sev:'worsen', alert:false},
+      {label:'SPY (S&P 500 ETF)', note:'11/9 +2.4% 반등, 7월 저점(729.46) 지키고 박스권 하단(754) 회복. 고점 대비 −5.62%→−3.17%. 단 20일 변동성 20.2%→22.3%',
+       prev:'735.29(11/6)', now:'754.37(11/13)', delta:'+2.59%', dir:'up', sev:'improve', alert:false},
+      {label:'하이일드 신용스프레드', note:'11/5 급락일 348bp(350bp 경보선 2bp 앞)까지 갔다가 빠르게 축소 — 신용시장은 주식 급락에 동요하지 않음',
+       prev:'332bp(11/4)', now:'320bp(11/12)', delta:'−12bp', dir:'down', sev:'improve', alert:false},
+      {label:'CNN 공포탐욕지수', note:'극단적 공포(25 미만)를 벗어나 공포 구간으로. Benzinga 11/9~11/13 보도 기준, 정확한 수치는 미확인',
+       prev:'극단적 공포 23', now:'공포 구간', delta:'구간 상승', dir:'up', sev:'improve', alert:false},
+      {label:'미시간 1년 기대인플레이션 (11월 예비)', note:'지난주 미확인이던 수치 확인. 8월 이후 최저 — 체감 물가 불안은 완화',
+       prev:'4.7%(10월 확정)', now:'4.3%(11월 예비)', delta:'−0.4%p', dir:'down', sev:'improve', alert:false}
+    ]
+  };
+
+  (function(){
+    var range=document.getElementById('deltaRange'), body=document.getElementById('deltaBody');
+    if(!WEEK.changes.length){
+      range.textContent = WEEK.thisDate + ' · 기준선';
+      body.innerHTML =
+        '<div class="baseline-box">'+
+        '<h3>이번이 첫 회차입니다</h3>'+
+        '<p>비교할 지난주 값이 아직 없어서, 오늘 수치가 <strong>기준선</strong>이 됩니다. '+
+        '다음 회차부터 이 자리에 <strong>지난주 대비 달라진 지표만</strong> 추려서 표시됩니다 &mdash; '+
+        '어떤 값이 얼마나 움직였는지, 그게 위험 쪽인지 안정 쪽인지까지요.</p>'+
+        '<p style="color:var(--muted);font-size:13.4px">경보 임계선을 넘은 지표(하이일드 스프레드 350bp 돌파, '+
+        'LEI 6개월 변화율 &minus;4.3% 하향, 실업률 급등, 마진부채 2개월 연속 감소 등)가 있으면 '+
+        '그 줄은 붉게 강조되어 맨 위에 놓입니다.</p>'+
+        '</div>';
+      return;
+    }
+    range.textContent = (WEEK.prevDate||'') + ' → ' + WEEK.thisDate;
+    var arrow={up:'↑',down:'↓',flat:'→'};
+    var rows=WEEK.changes.slice().sort(function(a,b){ return (b.alert?1:0)-(a.alert?1:0); });
+    var html='<div class="delta-list">';
+    rows.forEach(function(c){
+      var sev=c.sev||'neutral';
+      html+='<div class="delta-row'+(c.alert?' alert':'')+'">'+
+        '<span class="arw '+sev+'">'+(arrow[c.dir]||'→')+'</span>'+
+        '<span class="nm">'+c.label+(c.note?'<small>'+c.note+'</small>':'')+'</span>'+
+        '<span class="vals"><span class="prev">'+c.prev+'</span> → <span class="now">'+c.now+'</span>'+
+        (c.delta?'<span class="dlt '+sev+'">'+c.delta+'</span>':'')+'</span>'+
+        '</div>';
+    });
+    body.innerHTML=html+'</div>';
+  })();
+
+  // ================= Fed funds vs 10Y =================
+  var labels=[], fed=[], ten=[];
+  (function(){
+    var f=[1.55,1.58,0.65,0.05,0.05,0.08,0.09,0.10,0.09,0.09,0.09,0.09,
+           0.09,0.08,0.07,0.07,0.06,0.08,0.10,0.09,0.08,0.08,0.08,0.08,
+           0.08,0.08,0.20,0.33,0.77,1.21,1.68,2.33,2.56,3.08,3.78,4.10,
+           4.33,4.57,4.65,4.83,5.06,5.08,5.12,5.33,5.33,5.33,5.33,5.33,
+           5.33,5.33,5.33,5.33,5.33,5.33,5.33,5.33,5.13,4.83,4.64,4.48,
+           4.33,4.33,4.33,4.33,4.33,4.33,4.33,4.33,4.22,4.09,3.88,3.72,
+           3.64,3.64,3.64,3.64,3.63,3.63,3.63,3.63,3.75,3.88];
+    var t=[1.76,1.50,0.87,0.66,0.67,0.73,0.62,0.65,0.68,0.79,0.87,0.93,
+           1.08,1.26,1.61,1.64,1.62,1.52,1.32,1.28,1.37,1.58,1.56,1.47,
+           1.76,1.93,2.13,2.75,2.90,3.14,2.90,2.90,3.52,3.98,3.89,3.62,
+           3.53,3.75,3.66,3.46,3.57,3.75,3.90,4.17,4.38,4.80,4.50,4.02,
+           4.06,4.21,4.21,4.54,4.48,4.31,4.25,3.87,3.72,4.10,4.36,4.39,
+           4.63,4.45,4.28,4.28,4.42,4.38,4.39,4.26,4.12,4.06,4.09,4.14,
+           4.21,4.13,4.25,4.32,4.48,4.47,4.60,4.68,4.99,5.13];
+    var y=2020,m=1;
+    for(var i=0;i<f.length;i++){
+      labels.push(y+'-'+(m<10?'0'+m:m)); fed.push(f[i]); ten.push(t[i]);
+      m++; if(m>12){ m=1; y++; }
+    }
+  })();
+
+  (function(){
+    var svg=document.getElementById('fedChart'), wrap=document.getElementById('fedWrap');
+    var W=860,H=320,padL=44,padR=118,padT=24,padB=34;
+    var maxV=5.7,minV=0,n=labels.length;
+    var plotW=W-padL-padR, plotH=H-padT-padB;
+    function xAt(i){ return padL+plotW*(i/(n-1)); }
+    function yAt(v){ return padT+plotH*(1-(v-minV)/(maxV-minV)); }
+    function idxOf(l){ return labels.indexOf(l); }
+
+    function bandRect(a,b,color){
+      var i0=idxOf(a), i1=idxOf(b);
+      svg.appendChild(el('rect',{x:xAt(i0),y:padT,width:xAt(i1)-xAt(i0),height:plotH,fill:color,opacity:0.07}));
+    }
+    bandRect('2022-03','2023-08', inkSoft);
+    bandRect('2024-09','2026-09', goodCol);
+
+    [0,1,2,3,4,5].forEach(function(v){
+      var y=yAt(v);
+      svg.appendChild(el('line',{x1:padL,x2:W-padR,y1:y,y2:y,stroke:lineColor,'stroke-width':1,opacity:0.6}));
+      var t=el('text',{x:padL-8,y:y+4,'font-size':11,fill:mutedCol,'text-anchor':'end','font-family':'IBM Plex Mono, monospace'});
+      t.textContent=v+'%'; svg.appendChild(t);
+    });
+
+    function pathOf(arr){ var d=''; for(var i=0;i<n;i++){ d+=(i?'L':'M')+xAt(i).toFixed(1)+','+yAt(arr[i]).toFixed(1)+' '; } return d; }
+    svg.appendChild(el('path',{d:pathOf(ten),fill:'none',stroke:S2,'stroke-width':2,'stroke-linejoin':'round','stroke-linecap':'round'}));
+    svg.appendChild(el('path',{d:pathOf(fed),fill:'none',stroke:S1,'stroke-width':2.5,'stroke-linejoin':'round','stroke-linecap':'round'}));
+
+    [['2020-01','2021-01','2022-01','2023-01','2024-01','2025-01','2026-01']][0].forEach(function(l){
+      var i=idxOf(l); if(i<0) return;
+      var t=el('text',{x:xAt(i),y:H-10,'font-size':11,fill:mutedCol,'text-anchor':'middle','font-family':'IBM Plex Mono, monospace'});
+      t.textContent=l.slice(0,4); svg.appendChild(t);
+    });
+
+    // endpoint labels (direct labelling: identity never colour-alone)
+    var last=n-1;
+    [[fed,S1,'기준금리','3.88%'],[ten,S2,'10년물 (10월 평균)','5.13%']].forEach(function(c){
+      svg.appendChild(el('circle',{cx:xAt(last),cy:yAt(c[0][last]),r:4,fill:c[1],stroke:tok('--surface','#fff'),'stroke-width':2}));
+      var t=el('text',{x:xAt(last)+10,y:yAt(c[0][last])-2,'font-size':12,'font-weight':600,
+        fill:c[1],'font-family':'"Noto Sans KR", sans-serif'});
+      t.textContent=c[2]; svg.appendChild(t);
+      var v=el('text',{x:xAt(last)+10,y:yAt(c[0][last])+14,'font-size':13,'font-weight':600,
+        fill:c[1],'font-family':'IBM Plex Mono, monospace'});
+      v.textContent=c[3]; svg.appendChild(v);
+    });
+
+    // hover layer
+    var tip=mkTip(wrap);
+    var cross=el('line',{x1:0,x2:0,y1:padT,y2:padT+plotH,stroke:inkSoft,'stroke-width':1,'stroke-dasharray':'4 3',opacity:0});
+    svg.appendChild(cross);
+    var d1=el('circle',{r:4.5,fill:S1,stroke:tok('--surface','#fff'),'stroke-width':2,opacity:0}); svg.appendChild(d1);
+    var d2=el('circle',{r:4.5,fill:S2,stroke:tok('--surface','#fff'),'stroke-width':2,opacity:0}); svg.appendChild(d2);
+    svg.addEventListener('mousemove',function(ev){
+      var r=svg.getBoundingClientRect();
+      var ux=(ev.clientX-r.left)/r.width*W;
+      var i=Math.round((ux-padL)/plotW*(n-1)); if(i<0)i=0; if(i>n-1)i=n-1;
+      cross.setAttribute('x1',xAt(i)); cross.setAttribute('x2',xAt(i)); cross.setAttribute('opacity',0.5);
+      d1.setAttribute('cx',xAt(i)); d1.setAttribute('cy',yAt(fed[i])); d1.setAttribute('opacity',1);
+      d2.setAttribute('cx',xAt(i)); d2.setAttribute('cy',yAt(ten[i])); d2.setAttribute('opacity',1);
+      tip.innerHTML='<span class="tt">'+labels[i]+'</span>'+
+        '<div class="tr"><i style="background:'+S1+'"></i>기준금리 '+fed[i].toFixed(2)+'%</div>'+
+        '<div class="tr"><i style="background:'+S2+'"></i>10년물 '+ten[i].toFixed(2)+'%</div>';
+      tip.style.opacity=1;
+      placeTip(tip, svg, xAt(i)/W, 14, padR/W);
+    });
+    svg.addEventListener('mouseleave',function(){
+      tip.style.opacity=0; cross.setAttribute('opacity',0);
+      d1.setAttribute('opacity',0); d2.setAttribute('opacity',0);
+    });
+  })();
+
+  // ================= Radar =================
+  (function(){
+    var axes=[{label:'밸류에이션',value:95},{label:'레버리지',value:85},
+      {label:'신용 안일도',value:90},{label:'투자자 심리',value:45},{label:'실물 펀더멘털',value:30}];
+    var svg=document.getElementById('radarChart'), cx=200, cy=198, R=132;
+    function ring(i,tot,rad){ var a=(-Math.PI/2)+(i*2*Math.PI/tot); return [cx+rad*Math.cos(a), cy+rad*Math.sin(a)]; }
+    [0.25,0.5,0.75,1].forEach(function(f){
+      var pts=axes.map(function(a,i){ return ring(i,axes.length,R*f).join(','); }).join(' ');
+      svg.appendChild(el('polygon',{points:pts,fill:'none',stroke:lineColor,'stroke-width':1}));
+    });
+    axes.forEach(function(a,i){
+      var p=ring(i,axes.length,R);
+      svg.appendChild(el('line',{x1:cx,y1:cy,x2:p[0],y2:p[1],stroke:lineColor,'stroke-width':1}));
+      var lp=ring(i,axes.length,R+34);
+      var t=el('text',{x:lp[0],y:lp[1],'text-anchor':'middle','font-size':13,fill:inkSoft,'font-weight':500,'font-family':'"Noto Sans KR", sans-serif'});
+      t.textContent=a.label; svg.appendChild(t);
+    });
+    var pts=axes.map(function(a,i){ return ring(i,axes.length,R*(a.value/100)).join(','); }).join(' ');
+    svg.appendChild(el('polygon',{points:pts,fill:accentCol,opacity:0.22,stroke:accentCol,'stroke-width':2.5,'stroke-linejoin':'round'}));
+    axes.forEach(function(a,i){
+      var p=ring(i,axes.length,R*(a.value/100));
+      svg.appendChild(el('circle',{cx:p[0],cy:p[1],r:4,fill:accentCol}));
+      var t=el('text',{x:p[0],y:p[1]-11,'text-anchor':'middle','font-size':11.5,'font-weight':700,fill:accentCol,'font-family':'IBM Plex Mono, monospace'});
+      t.textContent=a.value; svg.appendChild(t);
+    });
+  })();
+
+  // ================= Indicator cards =================
+  var cards=[
+    {label:'SPY (S&P 500 ETF)', value:'754.37', status:'warn', text:'11/13 종가. 11/5 733.00까지 밀린 뒤 7월 저점(729.46)을 지키고 반등해 박스권 하단(754) 언저리로 복귀. 10/6 신고가(779.09) 대비 <strong>−3.17%</strong>, 3월 저점 이후 +16.0%. 20일 변동성은 약 22%로 여전히 높습니다.'},
+    {label:'실효 기준금리', value:'3.88%', status:'warn', text:'10월 공식치 — 9/16 인상(3.75~4.00%)이 한 달 내내 반영. 10/28 FOMC는 동결(10−2, 반대 2표는 인상 주장). <strong>10월 CPI가 예상을 웃돌며 12월 8~9일 FOMC 인상 확률이 80%를 넘었습니다</strong>(월러 이사는 0.5%p도 언급).'},
+    {label:'10년물 국채금리', value:'5.10%', status:'crit', text:'11/12 일간 수치(Alpha Vantage). 11/5 4.84%에서 <strong>+26bp</strong> 뛰어 5% 임계선을 다시 넘었습니다 &mdash; 10월 CPI 서프라이즈 영향. 10월 월평균 5.13%(공식 월간치)로 2007년 이후 최고권.'},
+    {label:'실업률', value:'4.1%', status:'warn', text:'10월분(11/6 발표) — 9월 4.2%에서 다시 4.1%로 하락. 6개월 변화는 −0.2%p(4월 4.3%)로, Sahm룰(+0.5%p)과는 오히려 멀어졌습니다. 2024년 수준(3.9~4.2%)과 비슷한 범위.'},
+    {label:'미시간대 소비자심리', value:'51.0', status:'crit', text:'11월 예비치(11/6 발표). 10월 확정 48.0 대비 <strong>+6.3%</strong>로 석 달 만의 최고, 45 임계선과의 거리 6점. 다만 전년 11월(51.0)과 같은 수준이고 장기평균 83.7 대비 약 −39%로 여전히 역사적 최저권이라 경고는 유지. 확정치는 11월 하순.'},
+    {label:'컨퍼런스보드 LEI', value:'99.6', status:'good', text:'9월분(10/22 발표) 전월비 0.0%로 보합. <strong>6개월 변화율 +0.6%</strong>, 확산지수 55.0. 공식 침체 신호(−4.3%)와는 거리가 멉니다. 10월분은 11월 하순 발표 예정 — 이번 회차 새 값 없음.'},
+    {label:'비농업 고용 (신규, 10월)', value:'+16.5만', status:'good', text:'10월 고용보고서(11/6) — 예상(약 6.5만명)을 크게 웃돌았고, 8·9월치도 합계 8.4만명 상향 수정(9월 +2.9만→+6.0만). 계절조정 전(NSA) 전년비로도 +92.2만명(9월 수정 +52.5만). 단 2025년 10월 기저효과가 섞였을 수 있습니다.'},
+    {label:'CPI 인플레이션 (전년비)', value:'≈4.2%', status:'warn', text:'10월분(11/10 발표) 전월비 <strong>+0.4%</strong>(예상 +0.3%), 핵심 +0.3%(예상 +0.2%, 3개월 연속). 2025년 10월 셧다운으로 BLS가 공식 전년비를 내지 않아 KPMG 추정치(약 4.2%)를 표기 &mdash; 9월 3.7%보다 높습니다. 11월분은 12/10 발표.'},
+    {label:'실러 PER (CAPE)', value:'≈41배', status:'crit', text:'10/1 기준 GuruFocus 41.2배, thetrading.tools 40.7배(11/12 갱신) &mdash; 계산 방식에 따라 약간 다르지만 둘 다 닷컴버블 정점(44.2배)에 가까운 극단적 고평가 구간입니다.'},
+    {label:'버핏지수 (시총/GDP)', value:'288%', status:'crit', text:'2026년 2분기 공식 Z.1 발표분 — 사상 최고(1947년 이후 100번째 백분위수). 다음 공식치(3분기)는 12월경 발표. 그때까지 값 유지.'},
+    {label:'마진부채 (빚투지표)', value:'$1.48조', status:'crit', text:'9월분 $1.48조(전월비 약 +1.8~2.1%, 전년비 <strong>+31%</strong>). 6월 사상최고치(약 $1.50조)에 근접. 10월분은 아직 미발표(11월 하순 예상) &mdash; 11/5 급락 때 레버리지 축소가 시작됐는지가 관전 포인트입니다.'},
+    {label:'하이일드 신용스프레드', value:'320bp', status:'crit', text:'332bp(11/4)→<strong>348bp(11/5 급락일)</strong>→342(11/6)→334(11/9)→330(11/11)→<strong>320bp(11/12)</strong>. 350bp 경보선을 2bp 앞두고 되돌아섰습니다. 역사적으로는 여전히 낮은(안일한) 수준이라 경고 배지는 유지합니다.'},
+    {label:'CNN 공포탐욕지수', value:'공포 구간', status:'warn', text:'11/6 극단적 공포(23)에서 이번 주 반등과 함께 <strong>&lsquo;공포&rsquo;(25~44) 구간</strong>으로 올라섰습니다(Benzinga 11/9~11/13 보도 기준). 정확한 수치는 이번 회차에 확인하지 못했습니다. 극단적 공포 진입 후 반등이라는 역발상 신호가 나온 셈입니다.'}
+  ];
+  (function(){
+    var st={good:'양호',warn:'주의',crit:'경고'};
+    var grid=document.getElementById('cardGrid');
+    cards.forEach(function(c){
+      var d=document.createElement('div'); d.className='card';
+      d.innerHTML='<div class="row1"><span class="label">'+c.label+'</span><span class="status '+c.status+'">'+st[c.status]+'</span></div>'+
+        '<div class="value">'+c.value+'</div><div class="desc">'+c.text+'</div>';
+      grid.appendChild(d);
+    });
+  })();
+
+  // ================= Presidential cycle =================
+  (function(){
+    var data=[{year:'2025',tag:'1년차 · 취임',v:7.9},{year:'2026',tag:'2년차 · 중간선거',v:4.6,cur:true},
+      {year:'2027',tag:'3년차 · 선거 전년',v:16.4,best:true},{year:'2028',tag:'4년차 · 대선',v:8.1}];
+    var svg=document.getElementById('presChart'), wrap=document.getElementById('presWrap');
+    var W=860,H=320,padL=48,padR=20,padT=48,padB=64,maxV=18;
+    var plotH=H-padT-padB, plotW=W-padL-padR, band=plotW/data.length, barW=106;
+    function y0(){ return padT+plotH; }
+    function yF(v){ return y0()-plotH*(v/maxV); }
+    [0,5,10,15].forEach(function(v){
+      var y=yF(v);
+      svg.appendChild(el('line',{x1:padL,x2:W-padR,y1:y,y2:y,stroke:lineColor,'stroke-width':1,opacity:0.6}));
+      var t=el('text',{x:padL-10,y:y+4,'font-size':11,fill:mutedCol,'text-anchor':'end','font-family':'IBM Plex Mono, monospace'});
+      t.textContent=v+'%'; svg.appendChild(t);
+    });
+    var tip=mkTip(wrap);
+    data.forEach(function(d,i){
+      var cxb=padL+band*i+band/2, x=cxb-barW/2, y=yF(d.v), h=y0()-y;
+      var r=el('rect',{x:x,y:y,width:barW,height:h,rx:4,fill:d.cur?accentCol:mutedCol,opacity:d.cur?1:0.34});
+      svg.appendChild(r);
+      var hit=el('rect',{x:cxb-band/2,y:padT,width:band,height:plotH,fill:'transparent'});
+      svg.appendChild(hit);
+      hit.addEventListener('mouseenter',function(){
+        r.setAttribute('opacity', d.cur?1:0.55);
+        tip.innerHTML='<span class="tt">'+d.year+' · '+d.tag+'</span>평균 연수익률 +'+d.v.toFixed(1)+'%';
+        tip.style.opacity=1;
+        placeTip(tip, svg, cxb/W, 10);
+      });
+      hit.addEventListener('mouseleave',function(){ r.setAttribute('opacity', d.cur?1:0.34); tip.style.opacity=0; });
+
+      var vt=el('text',{x:cxb,y:y-10,'text-anchor':'middle','font-size':15,'font-weight':600,
+        fill:d.cur?accentCol:inkSoft,'font-family':'IBM Plex Mono, monospace'});
+      vt.textContent='+'+d.v.toFixed(1)+'%'; svg.appendChild(vt);
+      var yl=el('text',{x:cxb,y:y0()+24,'text-anchor':'middle','font-size':14,'font-weight':600,
+        fill:d.cur?accentCol:inkSoft,'font-family':'IBM Plex Mono, monospace'});
+      yl.textContent=d.year; svg.appendChild(yl);
+      var tl=el('text',{x:cxb,y:y0()+43,'text-anchor':'middle','font-size':12,fill:mutedCol,'font-family':'"Noto Sans KR", sans-serif'});
+      tl.textContent=d.tag; svg.appendChild(tl);
+      if(d.cur){
+        svg.appendChild(el('rect',{x:cxb-31,y:padT-36,width:62,height:23,rx:11.5,fill:accentSoft,stroke:accentCol,'stroke-width':1.5}));
+        var bt=el('text',{x:cxb,y:padT-20,'text-anchor':'middle','font-size':12,'font-weight':700,fill:accentCol,'font-family':'"Noto Sans KR", sans-serif'});
+        bt.textContent='현재'; svg.appendChild(bt);
+      }
+      if(d.best){
+        var bl=el('text',{x:cxb,y:padT-20,'text-anchor':'middle','font-size':12,'font-weight':700,fill:mutedCol,'font-family':'"Noto Sans KR", sans-serif'});
+        bl.textContent='사이클 최강'; svg.appendChild(bl);
+      }
+    });
+    svg.appendChild(el('line',{x1:padL,x2:W-padR,y1:y0(),y2:y0(),stroke:inkSoft,'stroke-width':1.5,opacity:0.5}));
+  })();
+
+  // ================= Seasonality =================
+  (function(){
+    var months=[{m:'1월',v:0.76,w:61},{m:'2월',v:-0.02,w:52},{m:'3월',v:0.54,w:59},{m:'4월',v:1.96,w:74},
+      {m:'5월',v:1.21,w:74},{m:'6월',v:0.03,w:53},{m:'7월',v:1.43,w:65},{m:'8월',v:0.02,w:65},
+      {m:'9월',v:-0.90,w:52},{m:'10월',v:1.68,w:64},{m:'11월',v:2.44,w:76},{m:'12월',v:0.46,w:64}];
+    var svg=document.getElementById('seasonChart'), wrap=document.getElementById('seasonWrap');
+    var W=860,H=320,padL=48,padR=20,padT=40,padB=78;
+    var maxV=2.8,minV=-1.3, plotH=H-padT-padB, plotW=W-padL-padR, band=plotW/12, barW=42;
+    function yF(v){ return padT+plotH*(1-(v-minV)/(maxV-minV)); }
+    var zeroY=yF(0);
+
+    var bx=padL+band*8;
+    svg.appendChild(el('rect',{x:bx,y:padT,width:band*2,height:plotH,fill:critCol,opacity:0.07}));
+    var wt=el('text',{x:bx+band,y:padT-12,'text-anchor':'middle','font-size':12,'font-weight':600,fill:critCol,'font-family':'"Noto Sans KR", sans-serif'});
+    wt.textContent='통계적 취약 구간'; svg.appendChild(wt);
+
+    [-1,0,1,2].forEach(function(v){
+      var y=yF(v);
+      svg.appendChild(el('line',{x1:padL,x2:W-padR,y1:y,y2:y,stroke:lineColor,'stroke-width':1,opacity:v===0?0:0.6}));
+      var t=el('text',{x:padL-10,y:y+4,'font-size':11,fill:mutedCol,'text-anchor':'end','font-family':'IBM Plex Mono, monospace'});
+      t.textContent=(v>0?'+':'')+v+'%'; svg.appendChild(t);
+    });
+
+    var tip=mkTip(wrap);
+    months.forEach(function(d,i){
+      var cxb=padL+band*i+band/2, x=cxb-barW/2, yv=yF(d.v);
+      var y=Math.min(yv,zeroY), h=Math.max(Math.abs(yv-zeroY),1.5);
+      var fill=mutedCol, op=0.38;
+      if(i===8){ fill=critCol; op=1; } else if(i===10){ fill=goodCol; op=1; }
+      var r=el('rect',{x:x,y:y,width:barW,height:h,rx:3,fill:fill,opacity:op}); svg.appendChild(r);
+      var hit=el('rect',{x:cxb-band/2,y:padT,width:band,height:plotH,fill:'transparent'}); svg.appendChild(hit);
+      hit.addEventListener('mouseenter',function(){
+        r.setAttribute('opacity', op===1?1:0.62);
+        tip.innerHTML='<span class="tt">'+d.m+'</span>평균 '+(d.v>0?'+':'')+d.v.toFixed(2)+'% · 상승확률 '+d.w+'%';
+        tip.style.opacity=1;
+        placeTip(tip, svg, cxb/W, 6);
+      });
+      hit.addEventListener('mouseleave',function(){ r.setAttribute('opacity',op); tip.style.opacity=0; });
+
+      if(i===8||i===10){
+        var vt=el('text',{x:cxb,y:d.v<0?(y+h+16):(y-9),'text-anchor':'middle','font-size':13,'font-weight':700,
+          fill:i===8?critCol:goodCol,'font-family':'IBM Plex Mono, monospace'});
+        vt.textContent=(d.v>0?'+':'')+d.v.toFixed(2)+'%'; svg.appendChild(vt);
+      }
+      var ml=el('text',{x:cxb,y:padT+plotH+22,'text-anchor':'middle','font-size':12.5,
+        fill:(i===8||i===10)?inkSoft:mutedCol,'font-weight':(i===8||i===10)?600:400,'font-family':'"Noto Sans KR", sans-serif'});
+      ml.textContent=d.m; svg.appendChild(ml);
+    });
+    svg.appendChild(el('line',{x1:padL,x2:W-padR,y1:zeroY,y2:zeroY,stroke:inkSoft,'stroke-width':1.5,opacity:0.55}));
+
+    var nowX=padL+band*10.5;
+    svg.appendChild(el('line',{x1:nowX,x2:nowX,y1:padT,y2:padT+plotH,stroke:accentCol,'stroke-width':2,'stroke-dasharray':'5 4'}));
+    svg.appendChild(el('rect',{x:nowX-53,y:padT+plotH+34,width:106,height:23,rx:11.5,fill:accentSoft,stroke:accentCol,'stroke-width':1.5}));
+    var nt=el('text',{x:nowX,y:padT+plotH+50,'text-anchor':'middle','font-size':12,'font-weight':700,fill:accentCol,'font-family':'"Noto Sans KR", sans-serif'});
+    nt.textContent='지금 · 2026.11'; svg.appendChild(nt);
+  })();
+})();
+</script>
+
+</body></html>
